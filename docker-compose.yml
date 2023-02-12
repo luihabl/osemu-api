@@ -1,0 +1,12 @@
+version: '3.9'
+
+services:
+  api:
+    build:
+      context: .
+    ports:
+      - "8000:8000"
+    environment:
+      - FLASK_RUN_PORT=8000
+      - FLASK_RUN_HOST=0.0.0.0
+    command: sh -c "flask --app osemu run"

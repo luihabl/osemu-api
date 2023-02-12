@@ -9,7 +9,6 @@ COPY ./src /src
 WORKDIR /src
 
 EXPOSE 8000
-EXPOSE 5000
 
 RUN python -m venv /py && \
     /py/bin/pip install --upgrade pip && \
