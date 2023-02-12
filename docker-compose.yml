@@ -4,10 +4,14 @@ services:
   api:
     build:
       context: .
+    volumes:
+      - ./src:/src
     ports:
       - "8000:8000"
     environment:
       - FLASK_RUN_PORT=8000
       - FLASK_RUN_HOST=0.0.0.0
-    command: sh -c "flask --app osemu run"
+      - FLASK_DEBUG=1
+      - FLASK_APP=osemu
+    command: sh -c "flask run"
     stop_signal: SIGINT
