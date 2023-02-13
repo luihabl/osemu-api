@@ -15,3 +15,15 @@ services:
       - FLASK_APP=osemu
     command: sh -c "flask run"
     stop_signal: SIGINT
+
+  db:
+    image: postgres:15-alpine
+    volumes:
+      - dev-db-data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=devdb
+      - POSTGRES_USER=devuser
+      - POSTGRES_PASSWORD=devpass
+
+volumes:
+  dev-db-data:

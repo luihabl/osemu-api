@@ -13,3 +13,6 @@ src/*/*/*/__pycache__/
 .env/
 .venv/
 venv/
+
+# Flask folder
+src/instance/
