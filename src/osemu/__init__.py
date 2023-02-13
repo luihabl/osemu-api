@@ -1,7 +1,7 @@
 import os
 from flask import Flask, jsonify
 from .extensions import db
-from .models import *
+from .api.models import *
 
 def create_app():
 
@@ -25,7 +25,6 @@ def create_app():
 
     with app.app_context():
         db.create_all()
-
 
     from .api import api_bp
     app.register_blueprint(api_bp)
