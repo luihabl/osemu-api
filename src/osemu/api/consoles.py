@@ -1,5 +1,9 @@
 from flask import Blueprint, jsonify, request
+from marshmallow import ValidationError
+from sqlalchemy.exc import IntegrityError
+
 from .models import Console
+from .schema import ConsoleSchema
 from ..extensions import db
 
 consoles_bp = Blueprint('consoles', __name__, url_prefix='/consoles')
@@ -18,14 +22,22 @@ def show_stuff():
 
 
 @consoles_bp.route('/', methods=['POST'])
-def add_stuff():
+def new_console():
 
-    data = request.get_json()
+    json_data = request.get_json()
+    if not json_data:
+        return {"message": "No input data provided"}, 400  
 
-    name = data['name']
-    manufacturer = data['manufacturer']
+    try:
+        console = ConsoleSchema(load_instance=True).load(json_data)
+    except ValidationError as err:
+        return err.messages, 422
 
-    console = Console(id=None, name=name, manufacturer=manufacturer)
-    db.session.add(console)
-    db.session.commit()
-    return f'Console added [{console.name}]'
+    try:
+        db.session.add(console)
+        db.session.commit()
+    except IntegrityError as err:
+        # msg = f'{err.orig}: {err.orig.args[1]}'
+        return f'{err.orig}', 422
+
+    return f'Console added [{json_data}]'
