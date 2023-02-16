@@ -40,6 +40,11 @@ def get_consoles():
         return ConsoleSchema().dump(consoles[0])
     return ConsoleSchema(many=True).dump(consoles) 
 
+@consoles_bp.route('/<id>', methods=['GET'])
+def get_console_by_id(id):
+        console = db.get_or_404(Console, id)
+        return ConsoleSchema().dump(console)
+
 @consoles_bp.route('/', methods=['POST'])
 def add_console():
 
@@ -49,9 +54,11 @@ def add_console():
 
     try:
         if isinstance(json_data, list):
-            console = ConsoleSchema(load_instance=True, many=True).load(json_data)
+            console_data = ConsoleSchema(many=True).load(json_data)
+            console = [Console(**c) for c in console_data]
         elif isinstance(json_data, dict):
-            console = ConsoleSchema(load_instance=True, many=False).load(json_data)
+            console_data = ConsoleSchema(many=False).load(json_data)
+            console = Console(**console_data)
         else:
             raise ValidationError
 
@@ -70,12 +77,6 @@ def add_console():
     return f'Console added [{json_data}]'
 
 
-@consoles_bp.route('/<id>', methods=['GET'])
-def get_console_by_id(id):
-        console = db.get_or_404(Console, id)
-        return ConsoleSchema().dump(console)
-
-
 @consoles_bp.route('/<id>', methods=['PATCH', 'PUT'])
 def update_console(id):
 
@@ -83,7 +84,7 @@ def update_console(id):
 
     json_data = request.get_json()
     if not json_data:
-        return {"message": "No input data provided"}, 400  
+        return "No input data provided", 400  
 
     partial = request.method == 'PATCH'
     

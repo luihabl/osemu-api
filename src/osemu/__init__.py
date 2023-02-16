@@ -1,6 +1,6 @@
 import os
 from flask import Flask, jsonify
-from .extensions import db, ma
+from .extensions import db
 from .api.models import *
 
 def create_app():
@@ -28,8 +28,6 @@ def create_app():
 
     from .api import api_bp
     app.register_blueprint(api_bp)
-
-    ma.init_app(app)
 
     return app
 

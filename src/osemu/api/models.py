@@ -5,11 +5,16 @@ from sqlalchemy.dialects.postgresql import UUID
 import uuid
 
 
+# emulator_console = db.Table('emulator_console',
+#     db.Column('emulator_id', db.UUID, db.ForeignKey('emulator.id')),
+#     db.Column('console_id',  db.UUID, db.ForeignKey('console.id'))
+# )
+
 
 class Console(db.Model):
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     name = db.Column(db.String(255), nullable=False, unique=True)
-    manufacturer = db.Column(db.String(255), nullable=False)
+    manufacturer = db.Column(db.String(255), nullable=False) 
 
     @validates('name')
     def validate_name(self, key, name):
@@ -29,3 +34,11 @@ class Console(db.Model):
         CheckConstraint('char_length(manufacturer) > 2',
                         name='manufacturer_min_length')
     )
+
+
+# class Emulator(db.Model):
+#     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+#     # id = db.Column(db.Integer, primary_key=True)
+#     name = db.Column(db.String(255), nullable=False, unique=True)
+#     # git_url = db.Column(db.String(255), unique=False)
+#     consoles = db.relationship('Console', secondary=emulator_console, backref='emulators')
