@@ -55,10 +55,12 @@ def add_console():
         return err.messages, 422
 
     try:
-        db.session.add(console)
+        if isinstance(console, list):
+            db.session.add_all(console)
+        else:
+            db.session.add(console)
         db.session.commit()
     except IntegrityError as err:
-        # msg = f'{err.orig}: {err.orig.args[1]}'
         return f'{err.orig}', 422
 
     return f'Console added [{json_data}]'
