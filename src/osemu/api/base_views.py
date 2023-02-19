@@ -1,12 +1,77 @@
 from flask import request
 from flask.views import MethodView
-from marshmallow import ValidationError
+from marshmallow import ValidationError, fields, EXCLUDE
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm.attributes import InstrumentedAttribute
 
 from ..extensions import db
 
-def all_as_list(q):
+def _all_as_list(q):
     return [it for (it,) in q.all()]
+
+def _filter_wild(Model, query, par_list, data):
+    for key in par_list:
+        if key in data:
+            val = data[key]
+            attr = getattr(Model, key)
+            query = query.where(attr.ilike(f'%{val}%'))
+    return query
+
+def _filter_exact(Model, query, par_list, data):
+    for key in par_list:
+        if key in data:
+            val = data[key]
+            attr = getattr(Model, key)
+            query = query.where(attr == val)
+    return query
+
+
+def _get_or_create(Schema, parsed_data, raw_data):
+    search_keys = {}
+    for k, v in raw_data.items():
+        col = Schema.model.__dict__[k]
+
+        try:
+            if col.primary_key or (not col.nullable and col.unique) :
+                search_keys[k] = v
+        except AttributeError:
+            continue
+
+    instance = db.session.query(Schema.model).filter_by(**search_keys).first()
+
+    if instance:
+        return instance
+    else:
+        return Schema.model(**parsed_data)
+
+
+def _get_or_create_obj(Schema, data):
+    if isinstance(data, list):
+        entry_data = Schema(many=True, partial=True).load(data)
+        return [_get_or_create_obj(Schema, c) for c in entry_data]
+    elif isinstance(data, dict):
+        entry_data = Schema(many=False, partial=True).load(data)
+
+        input_data = {}
+
+        for k, v in entry_data.items():
+            field = Schema().fields[k]
+            if not isinstance(field, fields.Nested):
+                input_data[k] = v
+            else:
+                NestedSchema = field.nested
+                is_many = field.many
+                
+                if is_many:
+                    input_data[k] = [_get_or_create_obj(NestedSchema, vi) for vi in v]
+                else:
+                    input_data[k] = _get_or_create_obj(NestedSchema, v)
+
+        return _get_or_create(Schema, input_data, data)
+    else:
+        raise ValueError
+
+
 
 class BaseModelView(MethodView):
     """
@@ -15,22 +80,6 @@ class BaseModelView(MethodView):
     def __init__(self, Model, Schema):
         self.Model = Model
         self.Schema = Schema
-
-    def _filter_wild(self, query, par_list, data):
-        for key in par_list:
-            if key in data:
-                val = data[key]
-                attr = getattr(self.Model, key)
-                query = query.where(attr.ilike(f'%{val}%'))
-        return query
-
-    def _filter_exact(self, query, par_list, data):
-        for key in par_list:
-            if key in data:
-                val = data[key]
-                attr = getattr(self.Model, key)
-                query = query.where(attr == val)
-        return query
 
 
 class EntryAPI(BaseModelView):
@@ -87,11 +136,10 @@ class GroupAPI(BaseModelView):
     def get(self):
         data = request.values.to_dict()
 
-        print(self.searchable_fields)
-        entries = self._filter_wild(db.select(self.Model), 
+        entries = _filter_wild(self.Model, db.select(self.Model), 
                             self.searchable_fields, data)
-        entries = self._filter_exact(entries, ['id'], data)
-        entries = all_as_list(db.session.execute(entries))
+        entries = _filter_exact(self.Model, entries, ['id'], data)
+        entries = _all_as_list(db.session.execute(entries))
 
         if len(entries) == 1:
             return self.Schema().dump(entries[0])
@@ -103,17 +151,9 @@ class GroupAPI(BaseModelView):
             return {"message": "No input data provided"}, 400  
 
         try:
-            if isinstance(json_data, list):
-                entry_data = self.Schema(many=True).load(json_data)
-                entry = [self.Model(**c) for c in entry_data]
-            elif isinstance(json_data, dict):
-                entry_data = self.Schema(many=False).load(json_data)
-                entry = self.Model(**entry_data)
-            else:
-                raise ValidationError
-
+            entry = _get_or_create_obj(self.Schema, json_data)
         except ValidationError as err:
-            return err.messages, 422
+            return f'ValidationError: {err.messages}', 422
 
         try:
             if isinstance(entry, list):

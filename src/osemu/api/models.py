@@ -5,6 +5,12 @@ from sqlalchemy.dialects.postgresql import UUID
 import uuid
 
 
+emu_console = db.Table('emu_console',
+                       db.Column('emulator_id', db.UUID, db.ForeignKey('emulator.id')),
+                       db.Column('console_id', db.UUID, db.ForeignKey('console.id'))
+                    )
+
+
 class Console(db.Model):
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     name = db.Column(db.String(255), nullable=False, unique=True)
@@ -34,3 +40,4 @@ class Emulator(db.Model):
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     name = db.Column(db.String(255), nullable=False, unique=True)  
     git_url = db.Column(db.String(255), nullable=True) 
+    consoles = db.relationship('Console', secondary=emu_console, backref='emulators')
