@@ -58,6 +58,29 @@ def wait_for_db():
     print('Database available!')
     return 0
 
+@manage_cli.command(context_settings={"ignore_unknown_options": True})
+def create_db():
+
+    conn = psycopg2.connect(
+        dbname=os.getenv("POSTGRES_DEFAULT_DB"),
+        user=os.getenv("POSTGRES_USER"),
+        password=os.getenv("POSTGRES_PASSWORD"),
+        host=os.getenv("POSTGRES_HOSTNAME"),
+        port=os.getenv("POSTGRES_PORT"),
+    )
+
+    conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
+    cursor = conn.cursor()
+
+    cursor.execute(f"SELECT 1 FROM pg_catalog.pg_database WHERE datname = '{os.getenv('APP_DB')}'")
+    exists = cursor.fetchone()
+    if not exists:
+        cursor.execute(f"CREATE DATABASE {os.getenv('APP_DB')}")
+
+    cursor.close()
+    conn.close()
+
+    # run_sql([f"CREATE DATABASE {os.getenv('APP_DB')}"])
 
 @manage_cli.command(context_settings={"ignore_unknown_options": True})
 def test():
