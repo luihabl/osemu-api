@@ -14,11 +14,12 @@ services:
       - FLASK_DEBUG=1
       - FLASK_APP=osemu
       - FLASK_DEV_SECRET_KEY=devkey
-      - POSTGRES_DB=devdb
-      - POSTGRES_USER=devuser
-      - POSTGRES_PASSWORD=devpass
+      - APP_DB=osemudata
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
       - POSTGRES_HOST=db
-    command: sh -c "flask run"
+    command: flask run
     stop_signal: SIGINT
     depends_on:
       - db
@@ -28,9 +29,11 @@ services:
     volumes:
       - dev-db-data:/var/lib/postgresql/data
     environment:
-      - POSTGRES_DB=devdb
-      - POSTGRES_USER=devuser
-      - POSTGRES_PASSWORD=devpass
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - "5432:5432"
 
 volumes:
   dev-db-data:

@@ -1,19 +1,18 @@
 import pytest
 from osemu import create_app
 from osemu import config
+from osemu.extensions import db
+import os
 
-@pytest.fixture
-def app():
-    app = create_app(config.TestingConfig)
+@pytest.fixture(scope='session')
+def app(request):
+    app = create_app(config=config.TestingConfig)
+
+    # with app.app_context():
+    #     db.create_all()
+    #     yield app
+    #     db.session.remove()
+    #     db.drop_all()
+    
     return app
-
-
-@pytest.fixture()
-def client(app):
-    return app.test_client()
-
-
-@pytest.fixture()
-def runner(app):
-    return app.test_cli_runner()
     

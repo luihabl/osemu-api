@@ -3,3 +3,6 @@ flask-sqlalchemy>=3.0.3,<3.1
 psycopg2>=2.9.5,<2.10
 marshmallow>=3.19.0,<3.20.0
 pytest>=7.2.1,<7.3.0
+coverage
+pytest-cov
+flask-migrate>=4.0.4,<4.1.0

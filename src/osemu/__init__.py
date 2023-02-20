@@ -1,10 +1,10 @@
 import os
 from flask import Flask, jsonify
-from .extensions import db
+from .extensions import db, migrate
 from .api.models import *
 from .config import DevelopmentConfig
 
-def create_app(config=DevelopmentConfig):
+def create_app(config=DevelopmentConfig, init_db=True):
 
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_object(config)
@@ -13,12 +13,10 @@ def create_app(config=DevelopmentConfig):
         os.makedirs(app.instance_path)
     except OSError:
         pass
-        
+    
     db.init_app(app)
-
-    with app.app_context():        
-        db.create_all()
-
+    migrate.init_app(app, db)
+    
     from .api import api_bp
     app.register_blueprint(api_bp)
 

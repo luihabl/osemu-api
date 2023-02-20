@@ -5,7 +5,7 @@ def _get_db_uri(**kwargs):
     db_data = {
         'db_user': os.environ.get('POSTGRES_USER'),
         'db_pass': os.environ.get('POSTGRES_PASSWORD'),
-        'db_name': os.environ.get('POSTGRES_DB'),
+        'db_name': os.environ.get('APP_DB'),
         'db_host': os.environ.get('POSTGRES_HOST')
     }
 
@@ -17,6 +17,7 @@ def _get_db_uri(**kwargs):
 class BaseConfig:
     TESTING = False
     SQLALCHEMY_DATABASE_URI = _get_db_uri()
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
     
 
 class DevelopmentConfig(BaseConfig):
