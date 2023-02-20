@@ -1,6 +1,7 @@
-from flask import request
+from flask import request, jsonify
 from flask.views import MethodView
 from marshmallow import ValidationError, fields, EXCLUDE
+from sqlalchemy import inspect
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.attributes import InstrumentedAttribute
 
@@ -25,32 +26,35 @@ def _filter_exact(Model, query, par_list, data):
             query = query.where(attr == val)
     return query
 
-
-def _get_or_create(Schema, parsed_data, raw_data):
+def _find_entry(Schema, raw_data):
     search_keys = {}
     for k, v in raw_data.items():
         col = Schema.model.__dict__[k]
 
         try:
-            if col.primary_key or (not col.nullable and col.unique) :
+            if col.primary_key or (not col.nullable and col.unique):
                 search_keys[k] = v
         except AttributeError:
             continue
+    
+    if search_keys == {}:
+        return None
 
-    instance = db.session.query(Schema.model).filter_by(**search_keys).first()
-
-    if instance:
-        return instance
-    else:
-        return Schema.model(**parsed_data)
+    return db.session.query(Schema.model).filter_by(**search_keys).first()
 
 
 def _get_or_create_obj(Schema, data):
     if isinstance(data, list):
-        entry_data = Schema(many=True, partial=True).load(data)
+        entry_data = Schema(many=True).load(data)
         return [_get_or_create_obj(Schema, c) for c in entry_data]
     elif isinstance(data, dict):
-        entry_data = Schema(many=False, partial=True).load(data)
+
+        # Tries to find obj, and if finds it, skips this part below and just returns object
+        obj_found = _find_entry(Schema, data)
+        if obj_found:
+            return obj_found
+
+        entry_data = Schema(many=False).load(data)
 
         input_data = {}
 
@@ -67,7 +71,7 @@ def _get_or_create_obj(Schema, data):
                 else:
                     input_data[k] = _get_or_create_obj(NestedSchema, v)
 
-        return _get_or_create(Schema, input_data, data)
+        return Schema.model(**input_data)
     else:
         raise ValueError
 
@@ -155,13 +159,24 @@ class GroupAPI(BaseModelView):
         except ValidationError as err:
             return f'ValidationError: {err.messages}', 422
 
-        try:
-            if isinstance(entry, list):
-                db.session.add_all(entry)
+        instances = {'existent':[], 'new': []}
+        instances_parsed = {'existent':[], 'new': []}
+
+        if not isinstance(entry, list):
+            entry = [entry]
+ 
+        for e in entry:
+            if inspect(e).persistent:
+                instances['existent'].append(e)
+                instances_parsed['existent'].append(self.Schema().dump(e))
             else:
-                db.session.add(entry)
+                instances['new'].append(e)
+                instances_parsed['new'].append(self.Schema().dump(e))
+
+        try:
+            db.session.add_all(instances['new'])
             db.session.commit()
         except IntegrityError as err:
             return f'{err.orig}', 422
 
-        return f'Entry added [{json_data}]'
+        return jsonify(instances_parsed)

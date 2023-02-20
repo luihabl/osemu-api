@@ -34,6 +34,8 @@ class Console(db.Model):
         CheckConstraint('char_length(manufacturer) > 2',
                         name='manufacturer_min_length')
     )
+    def __repr__(self) -> str:
+        return f'Console(id={self.id}, name={self.name})'
 
 
 class Emulator(db.Model):
@@ -41,3 +43,6 @@ class Emulator(db.Model):
     name = db.Column(db.String(255), nullable=False, unique=True)  
     git_url = db.Column(db.String(255), nullable=True) 
     consoles = db.relationship('Console', secondary=emu_console, backref='emulators')
+
+    def __repr__(self) -> str:
+        return f'Emulator(id={self.id}, name={self.name})'
