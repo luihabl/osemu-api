@@ -13,12 +13,15 @@ services:
       - FLASK_RUN_HOST=0.0.0.0
       - FLASK_DEBUG=1
       - FLASK_APP=osemu
+      - FLASK_DEV_SECRET_KEY=devkey
       - POSTGRES_DB=devdb
       - POSTGRES_USER=devuser
       - POSTGRES_PASSWORD=devpass
       - POSTGRES_HOST=db
     command: sh -c "flask run"
     stop_signal: SIGINT
+    depends_on:
+      - db
 
   db:
     image: postgres:15-alpine
