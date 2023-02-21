@@ -5,14 +5,23 @@ from osemu.extensions import db
 import os
 
 @pytest.fixture(scope='session')
-def app(request):
-    app = create_app(config=config.TestingConfig)
+def app():
 
-    # with app.app_context():
-    #     db.create_all()
-    #     yield app
-    #     db.session.remove()
-    #     db.drop_all()
+
+    app = create_app(config=config.TestingConfig, init_db=False)
+
+    with app.app_context():
+        yield app
     
-    return app
     
+@pytest.fixture(scope='function')
+def _db(app):
+    if 'USING_TEST_DB' in os.environ:
+        db.drop_all()
+        db.create_all()
+        yield db
+        db.session.remove()
+        db.drop_all()
+    else:
+        print('Not working with test database, so tests were aborted to avoid data loss.')
+        exit(1)

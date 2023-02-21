@@ -18,7 +18,7 @@ def connect_db():
         dbname=os.getenv("POSTGRES_DEFAULT_DB"),
         user=os.getenv("POSTGRES_USER"),
         password=os.getenv("POSTGRES_PASSWORD"),
-        host=os.getenv("POSTGRES_HOSTNAME"),
+        host=os.getenv("POSTGRES_HOST"),
         port=os.getenv("POSTGRES_PORT"),
     )
 
@@ -78,7 +78,7 @@ def test():
 def run():
 
     # Load env
-    call_and_exit('flask', 'run')
+    call_and_exit(['flask', 'run'])
 
 if __name__ == "__main__":
     manage_cli()

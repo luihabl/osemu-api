@@ -14,25 +14,35 @@ services:
       - FLASK_DEBUG=1
       - FLASK_APP=osemu
       - FLASK_DEV_SECRET_KEY=devkey
-      - APP_DB=osemudata
+      - APP_DB=test_osemudata
       - POSTGRES_DEFAULT_DB=postgres
-      - POSTGRES_HOSTNAME=db
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
-      - POSTGRES_HOST=db
+      - POSTGRES_HOST=db_test
+      - POSTGRES_PORT=5433
+      - USING_TEST_DB=
     command: sh -c "python manage.py wait-for-db && 
                     python manage.py create-db &&
                     python manage.py upgrade-db &&
                     python manage.py test"
     stop_signal: SIGINT
     depends_on:
-      - db
+      - db_test
+    networks:
+      - testnet
 
-  db:
+  db_test:
     image: postgres:15-alpine
     environment:
       - POSTGRES_DB=postgres
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
-    ports:
-      - "5432:5432"
+    command: -p 5433
+    expose:
+      - "5433"
+    networks:
+      - testnet
+  
+networks:
+  testnet:
+    driver: bridge

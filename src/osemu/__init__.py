@@ -16,7 +16,11 @@ def create_app(config=DevelopmentConfig, init_db=True):
     
     db.init_app(app)
     migrate.init_app(app, db)
-    
+
+    # if init_db:
+    #     with app.app_context():
+    #         db.create_all()
+
     from .api import api_bp
     app.register_blueprint(api_bp)
 
