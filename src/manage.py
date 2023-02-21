@@ -9,8 +9,11 @@ from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 def manage_cli():
     pass
 
+def call_and_exit(cmd):
+    exit(subprocess.call(cmd))
 
-def run_sql(statements):
+def connect_db():
+    """Connect to DB and get connection object."""
     conn = psycopg2.connect(
         dbname=os.getenv("POSTGRES_DEFAULT_DB"),
         user=os.getenv("POSTGRES_USER"),
@@ -20,24 +23,15 @@ def run_sql(statements):
     )
 
     conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
-    cursor = conn.cursor()
-    for statement in statements:
-        cursor.execute(statement)
+    return conn
 
-    cursor.close()
-    conn.close()
-
+def run_sql(cursor, statements):
+    for s in statements:
+        cursor.execute(s)
 
 def postgres_test():
     try:
-        conn = psycopg2.connect(
-            dbname=os.getenv("POSTGRES_DEFAULT_DB"),
-            user=os.getenv("POSTGRES_USER"),
-            password=os.getenv("POSTGRES_PASSWORD"),
-            host=os.getenv("POSTGRES_HOSTNAME"),
-            port=os.getenv("POSTGRES_PORT"),
-        )
-
+        conn = connect_db()
         conn.close()
         return True
     except Exception as err:
@@ -61,17 +55,8 @@ def wait_for_db():
 @manage_cli.command(context_settings={"ignore_unknown_options": True})
 def create_db():
 
-    conn = psycopg2.connect(
-        dbname=os.getenv("POSTGRES_DEFAULT_DB"),
-        user=os.getenv("POSTGRES_USER"),
-        password=os.getenv("POSTGRES_PASSWORD"),
-        host=os.getenv("POSTGRES_HOSTNAME"),
-        port=os.getenv("POSTGRES_PORT"),
-    )
-
-    conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
+    conn = connect_db()
     cursor = conn.cursor()
-
     cursor.execute(f"SELECT 1 FROM pg_catalog.pg_database WHERE datname = '{os.getenv('APP_DB')}'")
     exists = cursor.fetchone()
     if not exists:
@@ -80,18 +65,20 @@ def create_db():
     cursor.close()
     conn.close()
 
-    # run_sql([f"CREATE DATABASE {os.getenv('APP_DB')}"])
+
+@manage_cli.command(context_settings={"ignore_unknown_options": True})
+def upgrade_db():
+    call_and_exit(['flask', 'db', 'upgrade'])
 
 @manage_cli.command(context_settings={"ignore_unknown_options": True})
 def test():
-    run_sql([f"CREATE DATABASE {os.getenv('APP_DB')}"])
-    subprocess.call(['pytest'])
-
-
+    call_and_exit('pytest')
 
 @manage_cli.command(context_settings={"ignore_unknown_options": True})
 def run():
-    subprocess.call(['flask', 'run'])
+
+    # Load env
+    call_and_exit('flask', 'run')
 
 if __name__ == "__main__":
     manage_cli()

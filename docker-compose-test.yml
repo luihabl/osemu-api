@@ -20,7 +20,10 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_HOST=db
-    command: sh -c "python manage.py wait-for-db && python manage.py test"
+    command: sh -c "python manage.py wait-for-db && 
+                    python manage.py create-db &&
+                    python manage.py upgrade-db &&
+                    python manage.py test"
     stop_signal: SIGINT
     depends_on:
       - db

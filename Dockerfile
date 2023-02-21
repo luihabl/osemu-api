@@ -3,7 +3,6 @@ FROM python:3.11-alpine3.17
 ENV PYTHONUNBUFFERED 1
 
 COPY ./requirements.txt /tmp/requirements.txt
-COPY ./requirements.dev.txt /tmp/requirements.dev.txt
 
 COPY ./src /src
 WORKDIR /src
