@@ -222,6 +222,7 @@ def test_emulator_create_console_nested(mock_db, _db, app):
     parsed_data = EmulatorSchema(many=True).load(data)
 
     _get_or_create_obj(EmulatorSchema, parsed_data, True)
+    _db.session.commit()
 
     q = _db.session.query(Emulator).all()
     assert len(q) == len(parsed_data)
@@ -229,4 +230,7 @@ def test_emulator_create_console_nested(mock_db, _db, app):
     q = _db.session.query(Console).all()
     assert len(q) == 3
 
+    for d in parsed_data:
+        q = _db.session.query(Emulator).filter_by(name=d['name']).all()
+        assert len(q) == 1
 

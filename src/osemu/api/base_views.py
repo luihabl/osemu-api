@@ -49,7 +49,7 @@ def _get_or_create_obj(Schema, data, add=False):
     Args:
         Schema (Schema): Schema defined in schema.py
         data (dict): Dictionary used to create the objects
-        add (bool, optional): Whether to add the object directly to the database or return the objects. Defaults to False.
+        add (bool, optional): Whether to add the object directly to the database or return the objects. Data is not commited. Defaults to False.
 
     Returns:
         Model: Found or created object.
@@ -84,7 +84,6 @@ def _get_or_create_obj(Schema, data, add=False):
         obj = Schema.model(**input_data)
         if add:
             db.session.add_all([obj])
-            db.session.commit()
 
         return obj
     else:
