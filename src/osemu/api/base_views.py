@@ -43,10 +43,20 @@ def _find_entry(Schema, raw_data):
     return db.session.query(Schema.model).filter_by(**search_keys).first()
 
 
-def _get_or_create_obj(Schema, data):
+def _get_or_create_obj(Schema, data, add=False):
+    """Find an object in database or create a new one. This function is called recursively.
+
+    Args:
+        Schema (Schema): Schema defined in schema.py
+        data (dict): Dictionary used to create the objects
+        add (bool, optional): Whether to add the object directly to the database or return the objects. Defaults to False.
+
+    Returns:
+        Model: Found or created object.
+    """    
     if isinstance(data, list):
         entry_data = Schema(many=True).load(data)
-        return [_get_or_create_obj(Schema, c) for c in entry_data]
+        return [_get_or_create_obj(Schema, c, add) for c in entry_data]
     elif isinstance(data, dict):
 
         # Tries to find obj, and if finds it, skips this part below and just returns object
@@ -67,14 +77,18 @@ def _get_or_create_obj(Schema, data):
                 is_many = field.many
                 
                 if is_many:
-                    input_data[k] = [_get_or_create_obj(NestedSchema, vi) for vi in v]
+                    input_data[k] = [_get_or_create_obj(NestedSchema, vi, add) for vi in v]
                 else:
-                    input_data[k] = _get_or_create_obj(NestedSchema, v)
+                    input_data[k] = _get_or_create_obj(NestedSchema, v, add)
 
-        return Schema.model(**input_data)
+        obj = Schema.model(**input_data)
+        if add:
+            db.session.add_all([obj])
+            db.session.commit()
+
+        return obj
     else:
         raise ValueError
-
 
 
 class BaseModelView(MethodView):
