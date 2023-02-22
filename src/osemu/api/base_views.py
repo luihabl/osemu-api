@@ -87,7 +87,43 @@ def _get_or_create_obj(Schema, data, add=False):
 
         return obj
     else:
-        raise ValueError
+        raise ValueError("Incorrect input data type")
+
+
+def _update_obj(Schema, obj, data):
+    """Updates one or more object from a dictionary.
+
+    Args:
+        Schema (Schema): Object marshmallow schema
+        obj (db.Model): Object to be updated
+        data (dict): Data to update
+
+    Raises:
+        ValueError: data is malformed.
+    """    
+
+    if isinstance(data, list):
+        pass
+    elif isinstance(data, dict):
+
+        for k, v in data.items():
+
+            field = Schema().fields[k]
+
+            if not isinstance(field, fields.Nested):
+                setattr(obj, k, v)
+            else:
+                NestedSchema = field.nested
+                is_many = field.many
+                if is_many:
+                    nested_list = [_get_or_create_obj(NestedSchema, vi) for vi in v]
+                    setattr(obj, k, nested_list)
+                else:
+                    nested = _get_or_create_obj(NestedSchema, v)
+                    setattr(obj, k, nested)
+
+    else:
+        raise ValueError("Incorrect input data type")
 
 
 class BaseModelView(MethodView):
@@ -120,13 +156,14 @@ class EntryAPI(BaseModelView):
         partial = request.method == 'PATCH'
         
         try:
-            new_entry = self.Schema().load(json_data, partial=partial)
+            upd_data = self.Schema().load(json_data, partial=partial)
         except ValidationError as err:
             return err.messages, 400
 
-        new_entry['id'] = entry.id
-        for k in new_entry.keys():
-            setattr(entry, k, new_entry[k])
+
+        _update_obj(self.Schema, entry, upd_data)
+
+
         db.session.commit()
 
         return "Entry updated successfuly"    
