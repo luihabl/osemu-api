@@ -122,14 +122,14 @@ class EntryAPI(BaseModelView):
         try:
             new_entry = self.Schema().load(json_data, partial=partial)
         except ValidationError as err:
-            return err.messages, 422
+            return err.messages, 400
 
         new_entry['id'] = entry.id
         for k in new_entry.keys():
             setattr(entry, k, new_entry[k])
         db.session.commit()
 
-        return "Entry updated successfuly."    
+        return "Entry updated successfuly"    
 
     def patch(self, id):
         return self._update(id)
@@ -165,12 +165,12 @@ class GroupAPI(BaseModelView):
     def post(self):
         json_data = request.get_json()
         if not json_data:
-            return {"message": "No input data provided"}, 400  
+            return "No input data provided", 400  
 
         try:
             entry = _get_or_create_obj(self.Schema, json_data)
         except ValidationError as err:
-            return f'ValidationError: {err.messages}', 422
+            return err.messages, 400
 
         instances = {'existent':[], 'new': []}
         instances_parsed = {'existent':[], 'new': []}
@@ -190,6 +190,7 @@ class GroupAPI(BaseModelView):
             db.session.add_all(instances['new'])
             db.session.commit()
         except IntegrityError as err:
-            return f'{err.orig}', 422
+            db.session.rollback()
+            return f'{err.orig}', 400
 
         return jsonify(instances_parsed)
