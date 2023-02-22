@@ -12,7 +12,10 @@ def app():
 
     with app.app_context():
         yield app
-    
+
+@pytest.fixture()
+def client(app):
+    return app.test_client()
     
 @pytest.fixture(scope='function')
 def _db(app):
