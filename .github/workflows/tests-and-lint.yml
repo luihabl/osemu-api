@@ -1,0 +1,24 @@
+---
+name: Tests and lint checks ⚙️
+
+on: [push]
+
+jobs:
+  test-lint:
+    name: Test and lint
+    runs-on: ubuntu-22.04
+    steps:
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }
+
+      - name: Checkout latest commit
+        uses: actions/checkout@v3
+      
+      - name: Run tests
+        run: sh ./scripts/run_tests_docker.sh
+
+      
