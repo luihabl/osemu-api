@@ -134,11 +134,11 @@ def test_post_emulator_nested_console(client, _db):
             'consoles': [
                 {
                     'name': 'Console 1',
-                    'manufacturer': 'Manufacturer 1'
+                    'company': 'company 1'
                 },
                 {
                     'name': 'Console 2',
-                    'manufacturer': 'Manufacturer 1'
+                    'company': 'company 1'
                 }
             ]
         },
@@ -147,11 +147,11 @@ def test_post_emulator_nested_console(client, _db):
             'consoles': [
                 {
                     'name': 'Console 3',
-                    'manufacturer': 'Manufacturer 1'
+                    'company': 'company 1'
                 },
                 {
                     'name': 'Console 4',
-                    'manufacturer': 'Manufacturer 1'
+                    'company': 'company 1'
                 }
             ]
         },
@@ -160,7 +160,7 @@ def test_post_emulator_nested_console(client, _db):
             'consoles': [
                 {
                     'name': 'Console 5',
-                    'manufacturer': 'Manufacturer 1'
+                    'company': 'company 1'
                 }
             ]
         }
@@ -182,11 +182,11 @@ def test_post_emulator_nested_console(client, _db):
         'consoles': [
             {
                 'name': 'Console 1',
-                'manufacturer': 'Manufacturer 1'
+                'company': 'company 1'
             },
             {
                 'name': 'Console 2',
-                'manufacturer': 'Manufacturer 1'
+                'company': 'company 1'
             }
         ]
     }
@@ -216,11 +216,11 @@ def test_patch_emulator_nested_console(client, _db):
             'consoles': [
                 {
                     'name': 'Console 1',
-                    'manufacturer': 'Manufacturer 1'
+                    'company': 'company 1'
                 },
                 {
                     'name': 'Console 2',
-                    'manufacturer': 'Manufacturer 1'
+                    'company': 'company 1'
                 }
             ]
         },
@@ -229,11 +229,11 @@ def test_patch_emulator_nested_console(client, _db):
             'consoles': [
                 {
                     'name': 'Console 3',
-                    'manufacturer': 'Manufacturer 1'
+                    'company': 'company 1'
                 },
                 {
                     'name': 'Console 4',
-                    'manufacturer': 'Manufacturer 1'
+                    'company': 'company 1'
                 }
             ]
         }
@@ -250,11 +250,11 @@ def test_patch_emulator_nested_console(client, _db):
         'consoles' : [
              {
                 'name': 'Console 2',
-                'manufacturer': 'Manufacturer 1'
+                'company': 'company 1'
             },
             {
                 'name': 'Console 5',
-                'manufacturer': 'Manufacturer 1'
+                'company': 'company 1'
             }
         ]
     }
@@ -288,11 +288,11 @@ def test_put_emulator_nested_console(client, _db):
             'consoles': [
                 {
                     'name': 'Console 1',
-                    'manufacturer': 'Manufacturer 1'
+                    'company': 'company 1'
                 },
                 {
                     'name': 'Console 2',
-                    'manufacturer': 'Manufacturer 1'
+                    'company': 'company 1'
                 }
             ]
         },
@@ -301,11 +301,11 @@ def test_put_emulator_nested_console(client, _db):
             'consoles': [
                 {
                     'name': 'Console 3',
-                    'manufacturer': 'Manufacturer 1'
+                    'company': 'company 1'
                 },
                 {
                     'name': 'Console 4',
-                    'manufacturer': 'Manufacturer 1'
+                    'company': 'company 1'
                 }
             ]
         }
@@ -323,11 +323,11 @@ def test_put_emulator_nested_console(client, _db):
         'consoles': [
             {
                 'name': 'Console 2',
-                'manufacturer': 'Manufacturer 1'
+                'company': 'company 1'
             },
             {
                 'name': 'Console 4',
-                'manufacturer': 'Manufacturer 1'
+                'company': 'company 1'
             }
         ]
     }

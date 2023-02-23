@@ -25,7 +25,7 @@ def test_create_console(_db, app):
 
     data = {
         'name': 'Console 1',
-        'manufacturer': 'Manufacturer 1'
+        'company': 'company 1'
     }
 
     parsed_data = ConsoleSchema().load(data)
@@ -41,22 +41,22 @@ def test_create_console(_db, app):
     saved = q.first()
 
     assert saved.name == parsed_data['name']
-    assert saved.manufacturer == parsed_data['manufacturer']
+    assert saved.company == parsed_data['company']
 
 def test_create_many_console(_db, app):
 
     data = [
         {
             'name': 'Console 1',
-            'manufacturer': 'Manufacturer 1'
+            'company': 'company 1'
         },
         {
             'name': 'Console 2',
-            'manufacturer': 'Manufacturer 1'
+            'company': 'company 1'
         },
         {
             'name': 'Console 3',
-            'manufacturer': 'Manufacturer 1'
+            'company': 'company 1'
         }
     ]
 
@@ -73,14 +73,14 @@ def test_create_many_console(_db, app):
 
     for dq, dd in zip(q, data):
         assert dq.name == dd['name']
-        assert dq.manufacturer == dd['manufacturer']
+        assert dq.company == dd['company']
         
     
 def test_error_console_same_name(_db, app):
     
     data1 = {
         'name': 'Console 1',
-        'manufacturer': 'Manufacturer 2'
+        'company': 'company 2'
     }
 
     _db.session.add(Console(**data1))
@@ -88,7 +88,7 @@ def test_error_console_same_name(_db, app):
 
     data2 = {
         'name': 'Console 1',
-        'manufacturer': 'Manufacturer 2'
+        'company': 'company 2'
     }
 
     with pytest.raises(IntegrityError):
@@ -187,11 +187,11 @@ def test_emulator_create_console_nested(mock_db, _db, app):
             'consoles': [
                 {
                     'name': 'Console 1',
-                    'manufacturer': 'Manufacturer 1'
+                    'company': 'company 1'
                 },
                 {
                     'name': 'Console 2',
-                    'manufacturer': 'Manufacturer 1'
+                    'company': 'company 1'
                 }
             ]
         },
@@ -200,11 +200,11 @@ def test_emulator_create_console_nested(mock_db, _db, app):
             'consoles': [
                 {
                     'name': 'Console 2',
-                    'manufacturer': 'Manufacturer 1'
+                    'company': 'company 1'
                 },
                 {
                     'name': 'Console 3',
-                    'manufacturer': 'Manufacturer 1'
+                    'company': 'company 1'
                 }
             ]
         },
@@ -213,7 +213,7 @@ def test_emulator_create_console_nested(mock_db, _db, app):
             'consoles': [
                 {
                     'name': 'Console 1',
-                    'manufacturer': 'Manufacturer 1'
+                    'company': 'company 1'
                 }
             ]
         }

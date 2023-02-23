@@ -9,7 +9,7 @@ class ConsoleSchema(Schema):
     model = Console
     id = fields.UUID(dump_only=True)
     name = fields.String(required=True, validate=must_not_be_blank)
-    manufacturer = fields.String(required=True, validate=must_not_be_blank)
+    company = fields.String(required=True, validate=must_not_be_blank)
 
 class EmulatorSchema(Schema):
     model = Emulator

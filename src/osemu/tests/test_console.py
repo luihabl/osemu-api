@@ -16,7 +16,7 @@ def test_post_console(client, _db):
 
     data = {
         'name': 'Console 1',
-        'manufacturer': 'Manufacturer 1'
+        'company': 'company 1'
     }
 
     res = _post_dict(client, '/api/consoles/', data)
@@ -34,15 +34,15 @@ def test_post_many_consoles(client, _db):
     data = [
         {
             'name': 'Console 1',
-            'manufacturer': 'Manufacturer 1'
+            'company': 'company 1'
         },
         {
             'name': 'Console 2',
-            'manufacturer': 'Manufacturer 1'
+            'company': 'company 1'
         },
         {
             'name': 'Console 3',
-            'manufacturer': 'Manufacturer 1'
+            'company': 'company 1'
         }
     ]
 
@@ -56,18 +56,18 @@ def test_post_many_consoles(client, _db):
     for d in data:
         q = _db.session.query(Console).filter_by(**d).first()
         assert d['name'] == q.name
-        assert d['manufacturer'] == q.manufacturer
+        assert d['company'] == q.company
 
 
 def test_post_console_fail_duplicate(client, _db):
     data = [
         {
             'name': 'Console 1',
-            'manufacturer': 'Manufacturer 1'
+            'company': 'company 1'
         },
         {
             'name': 'Console 1',
-            'manufacturer': 'Manufacturer 1'
+            'company': 'company 1'
         }
     ]
 
@@ -86,15 +86,15 @@ def test_get_consoles(client, _db):
     data = [
         {
             'name': 'Console 1',
-            'manufacturer': 'Manufacturer 1'
+            'company': 'company 1'
         },
         {
             'name': 'Console 2',
-            'manufacturer': 'Manufacturer 1'
+            'company': 'company 1'
         },
         {
             'name': 'Console 3',
-            'manufacturer': 'Manufacturer 1'
+            'company': 'company 1'
         }
     ]
 
@@ -114,7 +114,7 @@ def test_get_consoles(client, _db):
 def test_patch_consoles(client, _db):
     data = {
                 'name': 'Console 2',
-                'manufacturer': 'Manufacturer 1'
+                'company': 'company 1'
            }
 
     res = _post_dict(client, '/api/consoles/', data)
@@ -144,7 +144,7 @@ def test_patch_consoles(client, _db):
 def test_put_consoles(client, _db):
     data = {
                 'name': 'Console 2',
-                'manufacturer': 'Manufacturer 1'
+                'company': 'company 1'
            }
 
     res = _post_dict(client, '/api/consoles/', data)
@@ -156,7 +156,7 @@ def test_put_consoles(client, _db):
     id = json.loads(res.data)['id']
     new_data = {
         'name' : 'New console',
-        'manufacturer' : 'Nontendo'
+        'company' : 'Nontendo'
     }
     
     res = client.put(f'/api/consoles/{id}/', 
@@ -170,7 +170,7 @@ def test_put_consoles(client, _db):
 
     res_data = json.loads(res.data)
     assert res_data['name'] == new_data['name']
-    assert res_data['manufacturer'] == new_data['manufacturer']
+    assert res_data['company'] == new_data['company']
 
 
 
