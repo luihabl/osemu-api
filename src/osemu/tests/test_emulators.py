@@ -210,24 +210,39 @@ def test_post_emulator_nested_console(client, _db):
             
 
 def test_patch_emulator_nested_console(client, _db):
-    data = {
-        'name': 'Emu 1',
-        'consoles': [
-            {
-                'name': 'Console 1',
-                'manufacturer': 'Manufacturer 1'
-            },
-            {
-                'name': 'Console 2',
-                'manufacturer': 'Manufacturer 1'
-            }
-        ]
-    }
+    data = [
+        {
+            'name': 'Emu 1',
+            'consoles': [
+                {
+                    'name': 'Console 1',
+                    'manufacturer': 'Manufacturer 1'
+                },
+                {
+                    'name': 'Console 2',
+                    'manufacturer': 'Manufacturer 1'
+                }
+            ]
+        },
+        {
+            'name': 'Emu 2',
+            'consoles': [
+                {
+                    'name': 'Console 3',
+                    'manufacturer': 'Manufacturer 1'
+                },
+                {
+                    'name': 'Console 4',
+                    'manufacturer': 'Manufacturer 1'
+                }
+            ]
+        }
+    ]
 
     res = _post_dict(client, '/api/emulators/', data)
     assert res.status_code == 200
 
-    res = client.get('/api/emulators/', query_string={'name': data['name']})
+    res = client.get('/api/emulators/', query_string={'name': data[0]['name']})
     assert res.status_code == 200
 
     id = json.loads(res.data)['id']
@@ -238,7 +253,7 @@ def test_patch_emulator_nested_console(client, _db):
                 'manufacturer': 'Manufacturer 1'
             },
             {
-                'name': 'Console 3',
+                'name': 'Console 5',
                 'manufacturer': 'Manufacturer 1'
             }
         ]
@@ -263,4 +278,76 @@ def test_patch_emulator_nested_console(client, _db):
     res = client.get(f'/api/consoles/')
     assert res.status_code == 200
     res_data = json.loads(res.data)
-    assert len(res_data) == 3
+    assert len(res_data) == 5
+
+
+def test_put_emulator_nested_console(client, _db):
+    data = [
+        {
+            'name': 'Emu 1',
+            'consoles': [
+                {
+                    'name': 'Console 1',
+                    'manufacturer': 'Manufacturer 1'
+                },
+                {
+                    'name': 'Console 2',
+                    'manufacturer': 'Manufacturer 1'
+                }
+            ]
+        },
+        {
+            'name': 'Emu 2',
+            'consoles': [
+                {
+                    'name': 'Console 3',
+                    'manufacturer': 'Manufacturer 1'
+                },
+                {
+                    'name': 'Console 4',
+                    'manufacturer': 'Manufacturer 1'
+                }
+            ]
+        }
+    ]
+
+    res = _post_dict(client, '/api/emulators/', data)
+    assert res.status_code == 200
+
+    res = client.get('/api/emulators/', query_string={'name': data[0]['name']})
+    assert res.status_code == 200
+
+    id = json.loads(res.data)['id']
+    new_data = {
+        'name': 'Emu 3',
+        'consoles': [
+            {
+                'name': 'Console 2',
+                'manufacturer': 'Manufacturer 1'
+            },
+            {
+                'name': 'Console 4',
+                'manufacturer': 'Manufacturer 1'
+            }
+        ]
+    }
+    
+    res = client.put(f'/api/emulators/{id}/', 
+                       data=json.dumps(new_data), 
+                       content_type='application/json')
+    
+
+    assert res.status_code == 200
+
+    res = client.get(f'/api/emulators/{id}/')
+    assert res.status_code == 200
+
+    res_data = json.loads(res.data)
+
+    assert new_data['name'] == res_data['name']
+    for c, r in zip(new_data['consoles'], res_data['consoles']):
+        for k, v in c.items():
+            assert v == r[k]
+
+
+    
