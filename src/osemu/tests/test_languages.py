@@ -4,9 +4,9 @@ Test languages API
 
 from osemu.api.models import Language
 from osemu.api.schema import LanguageSchema
-from osemu.tests.conftest import _TestAPIBase
+from osemu.tests.base_api_tests import _TestAPIBase
 
-class TestCompaniesAPI(_TestAPIBase):
+class TestLanguagesAPI(_TestAPIBase):
     ENDPOINT = '/api/languages/'
     MODEL = Language
     SCHEMA = LanguageSchema

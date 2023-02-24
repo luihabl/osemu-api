@@ -2,10 +2,9 @@
 Test companies API
 """
 
-from .conftest import _post_dict
 from osemu.api.models import Company
 from osemu.api.schema import CompanySchema
-from osemu.tests.conftest import _TestAPIBase
+from osemu.tests.base_api_tests import _TestAPIBase, _post_dict
 
 class TestCompaniesAPI(_TestAPIBase):
     ENDPOINT = '/api/companies/'

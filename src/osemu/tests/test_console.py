@@ -4,7 +4,7 @@ Test consoles API
 
 from osemu.api.models import Console, Company
 from osemu.api.schema import ConsoleSchema
-from .conftest import _TestAPIBase
+from osemu.tests.base_api_tests import _TestAPIBase
 
 
 class TestConsoleAPI(_TestAPIBase):

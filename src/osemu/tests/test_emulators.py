@@ -4,7 +4,7 @@ Test emulators API
 
 from osemu.api.models import Emulator
 from osemu.api.schema import EmulatorSchema
-from .conftest import _post_dict, _TestAPIBase, _check_dict
+from osemu.tests.base_api_tests import _TestAPIBase, _post_dict
 import json
 
 

@@ -29,7 +29,7 @@ class LanguageSchema(Schema):
 class LicenseSchema(Schema):
     model = models.License
     id = fields.UUID(dump_only=True)
-    name = fields.String()
+    name = fields.String(required=True, validate=must_not_be_blank)
     url = fields.String()
 
 class EmulatorSchema(Schema):
