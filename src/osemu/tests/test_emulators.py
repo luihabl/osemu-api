@@ -134,11 +134,11 @@ def test_post_emulator_nested_console(client, _db):
             'consoles': [
                 {
                     'name': 'Console 1',
-                    'company': 'company 1'
+                    'company': {'name': 'company 1'}
                 },
                 {
                     'name': 'Console 2',
-                    'company': 'company 1'
+                    'company': {'name': 'company 2'}
                 }
             ]
         },
@@ -147,11 +147,11 @@ def test_post_emulator_nested_console(client, _db):
             'consoles': [
                 {
                     'name': 'Console 3',
-                    'company': 'company 1'
+                    'company': {'name': 'company 3'}
                 },
                 {
                     'name': 'Console 4',
-                    'company': 'company 1'
+                    'company': {'name': 'company 4'}
                 }
             ]
         },
@@ -160,7 +160,7 @@ def test_post_emulator_nested_console(client, _db):
             'consoles': [
                 {
                     'name': 'Console 5',
-                    'company': 'company 1'
+                    'company': {'name': 'company 5'}
                 }
             ]
         }
@@ -182,11 +182,11 @@ def test_post_emulator_nested_console(client, _db):
         'consoles': [
             {
                 'name': 'Console 1',
-                'company': 'company 1'
+                'company': {'name': 'company 1'}
             },
             {
                 'name': 'Console 2',
-                'company': 'company 1'
+                'company': {'name': 'company 1'}
             }
         ]
     }
@@ -216,11 +216,11 @@ def test_patch_emulator_nested_console(client, _db):
             'consoles': [
                 {
                     'name': 'Console 1',
-                    'company': 'company 1'
+                    'company': {'name': 'company 1'}
                 },
                 {
                     'name': 'Console 2',
-                    'company': 'company 1'
+                    'company': {'name': 'company 2'}
                 }
             ]
         },
@@ -229,11 +229,11 @@ def test_patch_emulator_nested_console(client, _db):
             'consoles': [
                 {
                     'name': 'Console 3',
-                    'company': 'company 1'
+                    'company': {'name': 'company 3'}
                 },
                 {
                     'name': 'Console 4',
-                    'company': 'company 1'
+                    'company': {'name': 'company 4'}
                 }
             ]
         }
@@ -248,13 +248,13 @@ def test_patch_emulator_nested_console(client, _db):
     id = json.loads(res.data)['id']
     new_data = {
         'consoles' : [
-             {
+            {
                 'name': 'Console 2',
-                'company': 'company 1'
+                'company': {'name': 'company 1'}
             },
             {
                 'name': 'Console 5',
-                'company': 'company 1'
+                'company': {'name': 'company 1'}
             }
         ]
     }
@@ -271,9 +271,20 @@ def test_patch_emulator_nested_console(client, _db):
 
     res_data = json.loads(res.data)
 
-    for c, r in zip(new_data['consoles'], res_data['consoles']):
-        for k, v in c.items():
-            assert v == r[k]
+    count = 0
+    for c0 in new_data['consoles']:
+        for c1 in res_data['consoles']:
+            if c0['name'] == c1['name'] and  c0['company']['name'] == c1['company']['name']:
+                count += 1
+
+    # Have to do this count method since the lists were in different order
+    assert count == 2
+ 
+
+
+    # for c, r in zip(new_data['consoles'], res_data['consoles']):
+    #     assert c['name'] == r['name']
+    #     assert c['company']['name'] == r['company']['name']
 
     res = client.get(f'/api/consoles/')
     assert res.status_code == 200
@@ -288,11 +299,11 @@ def test_put_emulator_nested_console(client, _db):
             'consoles': [
                 {
                     'name': 'Console 1',
-                    'company': 'company 1'
+                    'company': {'name': 'company 1'}
                 },
                 {
                     'name': 'Console 2',
-                    'company': 'company 1'
+                    'company': {'name': 'company 2'}
                 }
             ]
         },
@@ -301,11 +312,11 @@ def test_put_emulator_nested_console(client, _db):
             'consoles': [
                 {
                     'name': 'Console 3',
-                    'company': 'company 1'
+                    'company': {'name': 'company 3'}
                 },
                 {
                     'name': 'Console 4',
-                    'company': 'company 1'
+                    'company': {'name': 'company 4'}
                 }
             ]
         }
@@ -323,11 +334,11 @@ def test_put_emulator_nested_console(client, _db):
         'consoles': [
             {
                 'name': 'Console 2',
-                'company': 'company 1'
+                'company': {'name': 'company 1'}
             },
             {
                 'name': 'Console 4',
-                'company': 'company 1'
+                'company': {'name': 'company 1'}
             }
         ]
     }
@@ -346,8 +357,9 @@ def test_put_emulator_nested_console(client, _db):
 
     assert new_data['name'] == res_data['name']
     for c, r in zip(new_data['consoles'], res_data['consoles']):
-        for k, v in c.items():
-            assert v == r[k]
+        assert c['name'] == r['name']
+        assert c['company']['name'] == r['company']['name']
+            
 
 
     
