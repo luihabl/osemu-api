@@ -10,3 +10,6 @@ api_bp.register_blueprint(emulators_bp)
 
 from .companies import companies_bp
 api_bp.register_blueprint(companies_bp)
+
+from .languages import languages_bp
+api_bp.register_blueprint(languages_bp)
