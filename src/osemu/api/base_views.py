@@ -213,7 +213,6 @@ class GroupAPI(BaseModelView):
             return err.messages, 400
 
         instances = {'existent':[], 'new': []}
-        instances_parsed = {'existent':[], 'new': []}
 
         if not isinstance(entry, list):
             entry = [entry]
@@ -221,10 +220,8 @@ class GroupAPI(BaseModelView):
         for e in entry:
             if inspect(e).persistent:
                 instances['existent'].append(e)
-                instances_parsed['existent'].append(self.Schema().dump(e))
             else:
                 instances['new'].append(e)
-                instances_parsed['new'].append(self.Schema().dump(e))
 
         try:
             db.session.add_all(instances['new'])
@@ -233,4 +230,7 @@ class GroupAPI(BaseModelView):
             db.session.rollback()
             return f'{err.orig}', 400
 
-        return jsonify(instances_parsed)
+        instances['new'] = self.Schema(many=True).dump(instances['new'])
+        instances['existent'] = self.Schema(many=True).dump(instances['existent'])
+
+        return jsonify(instances)
