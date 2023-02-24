@@ -1,7 +1,7 @@
 from flask import Blueprint
 
-from .models import Console
-from .schema import ConsoleSchema
+from osemu.api.models import Console
+from osemu.api.schema import ConsoleSchema
 
 from .base_views import EntryAPI, GroupAPI
 

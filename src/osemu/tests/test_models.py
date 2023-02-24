@@ -6,7 +6,7 @@ import pytest
 from unittest.mock import patch
 from osemu.api.models import Console, Emulator, Company
 from osemu.api.schema import ConsoleSchema, EmulatorSchema
-from osemu.api.base_views import _get_or_create_obj
+from osemu.api.views.base_views import _get_or_create_obj
 from sqlalchemy.exc import IntegrityError
 
 

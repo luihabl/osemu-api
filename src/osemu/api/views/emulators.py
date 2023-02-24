@@ -1,7 +1,7 @@
 from flask import Blueprint
 
-from .models import Emulator
-from .schema import EmulatorSchema
+from osemu.api.models import Emulator
+from osemu.api.schema import EmulatorSchema
 
 from .base_views import EntryAPI, GroupAPI
 

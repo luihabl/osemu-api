@@ -3,7 +3,7 @@ from flask import Blueprint
 from osemu.api.models import Company
 from osemu.api.schema import CompanySchema
 
-from osemu.api.base_views import EntryAPI, GroupAPI
+from osemu.api.views.base_views import EntryAPI, GroupAPI
 
 companies_bp = Blueprint('companies', __name__, url_prefix='/companies')
 

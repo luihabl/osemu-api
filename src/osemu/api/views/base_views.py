@@ -5,7 +5,7 @@ from sqlalchemy import inspect
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.attributes import InstrumentedAttribute
 
-from ..extensions import db
+from osemu.extensions import db
 
 def _all_as_list(q):
     return [it for (it,) in q.all()]

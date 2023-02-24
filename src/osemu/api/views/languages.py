@@ -3,7 +3,7 @@ from flask import Blueprint
 from osemu.api.models import Language
 from osemu.api.schema import LanguageSchema
 
-from osemu.api.base_views import EntryAPI, GroupAPI
+from osemu.api.views.base_views import EntryAPI, GroupAPI
 
 languages_bp = Blueprint('languages', __name__, url_prefix='/languages')
 
