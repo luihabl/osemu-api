@@ -43,7 +43,7 @@ def _find_entry(Schema, raw_data):
     return db.session.query(Schema.model).filter_by(**search_keys).first()
 
 
-def _get_or_create_obj(Schema, data, add=False):
+def get_or_create_obj(Schema, data, add=False):
     """Find an object in database or create a new one. This function is called recursively.
 
     Args:
@@ -56,7 +56,7 @@ def _get_or_create_obj(Schema, data, add=False):
     """    
     if isinstance(data, list):
         entry_data = Schema(many=True).load(data)
-        return [_get_or_create_obj(Schema, c, add) for c in entry_data]
+        return [get_or_create_obj(Schema, c, add) for c in entry_data]
     elif isinstance(data, dict):
 
         # Tries to find obj, and if finds it, skips this part below and just returns object
@@ -77,9 +77,9 @@ def _get_or_create_obj(Schema, data, add=False):
                 is_many = field.many
                 
                 if is_many:
-                    input_data[k] = [_get_or_create_obj(NestedSchema, vi, add) for vi in v]
+                    input_data[k] = [get_or_create_obj(NestedSchema, vi, add) for vi in v]
                 else:
-                    input_data[k] = _get_or_create_obj(NestedSchema, v, add)
+                    input_data[k] = get_or_create_obj(NestedSchema, v, add)
 
         obj = Schema.model(**input_data)
         if add:
@@ -117,11 +117,11 @@ def _update_obj(Schema, obj, data):
                 NestedSchema = field.nested
                 is_many = field.many
                 if is_many:
-                    nested_list = [_get_or_create_obj(NestedSchema, vi) for vi in v]
+                    nested_list = [get_or_create_obj(NestedSchema, vi) for vi in v]
                     setattr(obj, k, nested_list)
                     _update_obj(NestedSchema, nested_list, v)
                 else:
-                    nested = _get_or_create_obj(NestedSchema, v)
+                    nested = get_or_create_obj(NestedSchema, v)
                     setattr(obj, k, nested)
                     _update_obj(NestedSchema, nested, v)
 
@@ -208,7 +208,7 @@ class GroupAPI(BaseModelView):
             return "No input data provided", 400  
 
         try:
-            entry = _get_or_create_obj(self.Schema, json_data)
+            entry = get_or_create_obj(self.Schema, json_data)
         except ValidationError as err:
             return err.messages, 400
 

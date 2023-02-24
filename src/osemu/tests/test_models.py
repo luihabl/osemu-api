@@ -6,7 +6,7 @@ import pytest
 from unittest.mock import patch
 from osemu.api.models import Console, Emulator, Company
 from osemu.api.schema import ConsoleSchema, EmulatorSchema
-from osemu.api.views.base_views import _get_or_create_obj
+from osemu.api.views.base_views import get_or_create_obj
 from sqlalchemy.exc import IntegrityError
 
 
@@ -29,7 +29,7 @@ def test_create_console(_db, app):
     }
 
     parsed_data = ConsoleSchema().load(data)
-    new_console = _get_or_create_obj(ConsoleSchema, parsed_data)
+    new_console = get_or_create_obj(ConsoleSchema, parsed_data)
 
     _db.session.add(new_console)
     _db.session.commit()
@@ -63,7 +63,7 @@ def test_create_many_console(_db, app):
     ]
 
     parsed_data = ConsoleSchema(many=True).load(data)
-    objs = _get_or_create_obj(ConsoleSchema, parsed_data)
+    objs = get_or_create_obj(ConsoleSchema, parsed_data)
 
     _db.session.add_all(objs)
     _db.session.commit()
@@ -84,7 +84,7 @@ def test_error_console_same_name(_db, app):
         'company': {'name': 'company 2'}
     }
 
-    _db.session.add(_get_or_create_obj(ConsoleSchema, data1))
+    _db.session.add(get_or_create_obj(ConsoleSchema, data1))
     _db.session.commit()
 
     data2 = {
@@ -222,7 +222,7 @@ def test_emulator_create_console_nested(mock_db, _db, app):
 
     parsed_data = EmulatorSchema(many=True).load(data)
 
-    _get_or_create_obj(EmulatorSchema, parsed_data, True)
+    get_or_create_obj(EmulatorSchema, parsed_data, True)
     _db.session.commit()
 
     q = _db.session.query(Emulator).all()
