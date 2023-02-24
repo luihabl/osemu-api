@@ -90,7 +90,7 @@ def get_or_create_obj(Schema, data, add=False):
         raise ValueError("Incorrect input data type")
 
 
-def _update_obj(Schema, obj, data):
+def update_obj(Schema, obj, data):
     """Updates one or more object from a dictionary.
 
     Args:
@@ -104,7 +104,7 @@ def _update_obj(Schema, obj, data):
 
     if isinstance(data, list):
         for d, o in zip(data, obj):
-            _update_obj(Schema, o, d)
+            update_obj(Schema, o, d)
     elif isinstance(data, dict):
 
         for k, v in data.items():
@@ -119,11 +119,11 @@ def _update_obj(Schema, obj, data):
                 if is_many:
                     nested_list = [get_or_create_obj(NestedSchema, vi) for vi in v]
                     setattr(obj, k, nested_list)
-                    _update_obj(NestedSchema, nested_list, v)
+                    update_obj(NestedSchema, nested_list, v)
                 else:
                     nested = get_or_create_obj(NestedSchema, v)
                     setattr(obj, k, nested)
-                    _update_obj(NestedSchema, nested, v)
+                    update_obj(NestedSchema, nested, v)
 
     else:
         raise ValueError("Incorrect input data type")
@@ -164,7 +164,7 @@ class EntryAPI(BaseModelView):
             return err.messages, 400
 
 
-        _update_obj(self.Schema, entry, upd_data)
+        update_obj(self.Schema, entry, upd_data)
 
 
         db.session.commit()
