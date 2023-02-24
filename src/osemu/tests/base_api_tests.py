@@ -150,4 +150,28 @@ class _TestAPIBase(ABC):
         res_data = json.loads(res.data)
         assert _check_dict(data[1], res_data)
 
+    def test_delete(self, client, _db):
+        data = self.create_entries(3)
+
+        res = _post_dict(client, self.ENDPOINT, data)
+        assert res.status_code == 200
+
+        q = _db.session.query(self.MODEL).all()
+        assert len(q) == len(data)
+
+        id_0 = q[0].id
+        client.delete(f'{self.ENDPOINT}{id_0}/')
+
+        q = _db.session.query(self.MODEL).all()
+        assert len(q) == len(data) - 1
+
+        q_data = self.SCHEMA(many=True).dump(q)
+
+        assert _check_dict(data[1:], q_data)
+
+
+
+
+
+
 

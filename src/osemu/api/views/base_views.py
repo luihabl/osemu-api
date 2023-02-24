@@ -177,6 +177,12 @@ class EntryAPI(BaseModelView):
     def put(self, id):
         return self._update(id)
 
+    def delete(self, id):
+        entry = db.get_or_404(self.Model, id, description='Entity id not found.')
+        db.session.delete(entry)
+        db.session.commit()
+        return "Entry deleted successfuly"
+
 
 class GroupAPI(BaseModelView):
     """
