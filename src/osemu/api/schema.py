@@ -22,6 +22,9 @@ class ConsoleSchema(Schema):
     image_url = fields.String()
 
 class LanguageSchema(Schema):
+    class Meta:
+        exclude = ('emulators',)
+
     model = models.Language
     id = fields.UUID(dump_only=True)
     name = fields.String(required=True, validate=must_not_be_blank)

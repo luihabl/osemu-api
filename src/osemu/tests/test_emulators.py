@@ -2,7 +2,7 @@
 Test emulators API
 """
 
-from osemu.api.models import Emulator
+from osemu.api.models import Emulator, EmulatorLanguage, Language
 from osemu.api.schema import EmulatorSchema
 from osemu.tests.base_api_tests import _TestAPIBase, post_dict, check_dict
 import json
@@ -73,6 +73,32 @@ class TestEmulatorAPI(_TestAPIBase):
 
         res = post_dict(client, self.ENDPOINT, data)
         assert res.status_code == 200
+
+        res = client.get('/api/languages/')
+        res_data = json.loads(res.data)
+        assert len(res_data) == 2
+
+
+        data2 = self.create_entries(3)[-1]
+        data2['languages'] = [
+            {'language': {'name': 'C++'}, 'amount': 0.2},
+            {'language': {'name': 'Go'}, 'amount': 0.8}
+        ]
+
+        res = post_dict(client, self.ENDPOINT, data2)
+        assert res.status_code == 200
+
+        res = client.get('/api/languages/')
+        assert res.status_code == 200
+        res_data = json.loads(res.data)
+        print(res_data)
+        assert len(res_data) == 3
+
+        q = _db.session.query(Language).all()
+        assert len(q) == 3
+        q = _db.session.query(EmulatorLanguage).all()
+        assert len(q) == 4
+
 
     def test_post_emulator_nested_console(self, client, _db):
 
