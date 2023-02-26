@@ -4,7 +4,7 @@ Test companies API
 
 from osemu.api.models import Company
 from osemu.api.schema import CompanySchema
-from osemu.tests.base_api_tests import _TestAPIBase, _post_dict
+from osemu.tests.base_api_tests import _TestAPIBase
 
 class TestCompaniesAPI(_TestAPIBase):
     ENDPOINT = '/api/companies/'
