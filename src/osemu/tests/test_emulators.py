@@ -4,7 +4,7 @@ Test emulators API
 
 from osemu.api.models import Emulator
 from osemu.api.schema import EmulatorSchema
-from osemu.tests.base_api_tests import _TestAPIBase, _post_dict
+from osemu.tests.base_api_tests import _TestAPIBase, post_dict, check_dict
 import json
 
 
@@ -35,11 +35,50 @@ class TestEmulatorAPI(_TestAPIBase):
             return [entry(i) for i in range(n)]
 
 
+    def test_emu_license(self, client, _db):
+        data = self.create_entries(3)
+        data[0]['license'] = {'name': 'license 1', 'url': 'www.example.com'}
+        data[2]['license'] = {'name': 'license 2'}
+        post_dict(client, self.ENDPOINT, data)
+
+        res = client.get('/api/licenses/')
+        assert res.status_code == 200
+        
+        res_data = json.loads(res.data)
+        assert len(res_data) == 2
+        assert check_dict(data[0]['license'], res_data[0])
+        assert check_dict(data[2]['license'], res_data[1])
+
+        res = client.delete(f'/api/licenses/{res_data[0]["id"]}/')
+        assert res.status_code == 200
+
+        res = client.delete(f'/api/licenses/{res_data[1]["id"]}/')
+        assert res.status_code == 200
+
+        res = client.get(self.ENDPOINT)
+        assert res.status_code == 200
+        res_data = json.loads(res.data)
+
+        assert res_data[0]['license'] == None
+        assert res_data[1]['license'] == None
+        assert res_data[2]['license'] == None
+
+
+    def test_emu_programming_languages(self, client, _db):
+        data = self.create_entries(1)
+        data['languages'] = [
+            {'language': {'name': 'C++'}, 'amount': 0.2},
+            {'language': {'name': 'Python'}, 'amount': 0.8}
+        ]
+
+        res = post_dict(client, self.ENDPOINT, data)
+        assert res.status_code == 200
+
     def test_post_emulator_nested_console(self, client, _db):
 
         data = self.create_entries(3)
 
-        res = _post_dict(client, self.ENDPOINT, data)
+        res = post_dict(client, self.ENDPOINT, data)
         assert res.status_code == 200
 
         res = client.get(self.ENDPOINT)
@@ -62,7 +101,7 @@ class TestEmulatorAPI(_TestAPIBase):
             }
         ]
 
-        res = _post_dict(client, self.ENDPOINT, data2)
+        res = post_dict(client, self.ENDPOINT, data2)
         assert res.status_code == 200
 
         res = client.get(self.ENDPOINT)
@@ -78,7 +117,7 @@ class TestEmulatorAPI(_TestAPIBase):
         
         data = self.create_entries(2)
 
-        res = _post_dict(client, self.ENDPOINT, data)
+        res = post_dict(client, self.ENDPOINT, data)
         assert res.status_code == 200
 
         res = client.get(self.ENDPOINT, query_string={'name': data[0]['name']})

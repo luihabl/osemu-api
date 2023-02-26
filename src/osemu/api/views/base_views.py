@@ -4,6 +4,8 @@ from marshmallow import ValidationError, fields, EXCLUDE
 from sqlalchemy import inspect
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.attributes import InstrumentedAttribute
+from osemu.api.schema import *
+import sys
 
 from osemu.extensions import db
 
@@ -26,8 +28,21 @@ def _filter_exact(Model, query, par_list, data):
             query = query.where(attr == val)
     return query
 
+from types import FunctionType
+
+def _get_schema(Schema):
+    if isinstance(Schema, FunctionType):
+        Schema = Schema()
+    elif isinstance(Schema, str):
+        return getattr(sys.modules[__name__], Schema)
+    else:
+        return Schema
+
 def _find_entry(Schema, raw_data):
     search_keys = {}
+
+    Schema = _get_schema(Schema)
+
     for k, v in raw_data.items():
         col = Schema.model.__dict__[k]
 
@@ -53,7 +68,10 @@ def get_or_create_obj(Schema, data, add=False):
 
     Returns:
         Model: Found or created object.
-    """    
+    """
+
+    Schema = _get_schema(Schema)
+
     if isinstance(data, list):
         entry_data = Schema(many=True).load(data)
         return [get_or_create_obj(Schema, c, add) for c in entry_data]
@@ -81,7 +99,7 @@ def get_or_create_obj(Schema, data, add=False):
                 else:
                     input_data[k] = get_or_create_obj(NestedSchema, v, add)
 
-        obj = Schema.model(**input_data)
+        obj = Schema().model(**input_data)
         if add:
             db.session.add_all([obj])
 

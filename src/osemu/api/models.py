@@ -33,22 +33,23 @@ class Console(db.Model):
 
 
 class EmulatorLanguage(db.Model):
-    __tablename__ = 'emulator_language'
 
-    amount = db.Column(db.Float, nullable=False)
+    id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
 
-    emulator_id = db.Column(db.UUID, db.ForeignKey('emulator.id'), primary_key=True)
-    language_id = db.Column(db.UUID, db.ForeignKey('language.id'), primary_key=True)
-    
+    emulator_id = db.Column('emulator_id', db.UUID, db.ForeignKey('emulator.id'))
+    language_id = db.Column('language_id', db.UUID, db.ForeignKey('language.id'))
+
     emulator = db.relationship('Emulator', back_populates='languages')
     language = db.relationship('Language', back_populates='emulators')
+
+    amount = db.Column(db.Float, nullable=False)
 
 
 class Language(db.Model):
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     name = db.Column(db.String(255), nullable=False, unique=True)
 
-    emulators = db.relationship('EmulatorLanguage', back_populates='language')
+    emulators = db.relationship('EmulatorLanguage', cascade="all,delete", back_populates='language')
 
 
 class License(db.Model):
@@ -75,7 +76,7 @@ class Emulator(db.Model):
     latest_update = db.Column(db.DateTime)
     release_date = db.Column(db.Date)
 
-    languages = db.relationship('EmulatorLanguage', back_populates='emulator')
+    languages = db.relationship('EmulatorLanguage', cascade="all,delete", back_populates='emulator')
     
     def __repr__(self) -> str:
         return f'Emulator(id={self.id}, name={self.name})'
