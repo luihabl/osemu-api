@@ -5,6 +5,12 @@ def must_not_be_blank(data):
     if not data:
         raise ValidationError("Data not provided.")
 
+class UserSchema(Schema):
+    id = fields.UUID(dump_only=True)
+    email = fields.Email(required=True)
+    password = fields.String(required=True, load_only=True)
+    created_on = fields.DateTime(dump_only=True)
+
 class CompanySchema(Schema):
     model = models.Company
     id = fields.UUID(dump_only=True)

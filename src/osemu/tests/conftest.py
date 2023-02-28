@@ -1,8 +1,10 @@
+import os
 import pytest
 from osemu import create_app
 from osemu import config
 from osemu.extensions import db
-import os
+from osemu.api.models import User
+from flask_login import login_user, logout_user
 
 @pytest.fixture(scope='session')
 def app():
@@ -27,3 +29,14 @@ def _db(app):
     else:
         print('Not working with test database, so tests were aborted to avoid data loss.')
         exit(1)
+
+
+@pytest.fixture(scope='class')
+def authenticated_user(app):   
+
+    with app.test_request_context():
+        user = User(**{'email': 'test@test.com', 'password': 'test'})
+
+        login_user(user=user)
+        yield
+        logout_user()

@@ -4,16 +4,10 @@ Test emulators API
 
 from osemu.api.models import Emulator, EmulatorLanguage, Language
 from osemu.api.schema import EmulatorSchema
-from osemu.tests.base_api_tests import _TestAPIBase, post_dict, check_dict
+from osemu.tests.base_api_tests import _TestPrivateAPIBase, _TestPublicAPIBase, post_dict, check_dict
 import json
 
-
-class TestEmulatorAPI(_TestAPIBase):
-    ENDPOINT = '/api/emulators/'
-    MODEL = Emulator
-    SCHEMA = EmulatorSchema
-
-    def create_entries(self, n):
+def _create_entries(n):
         def entry(i):
             return {
                 'name': f'Emu {i}',
@@ -33,6 +27,24 @@ class TestEmulatorAPI(_TestAPIBase):
             return entry(1)
         else:
             return [entry(i) for i in range(n)]
+
+
+class TestEmulatorAPI(_TestPublicAPIBase):
+    ENDPOINT = '/api/emulators/'
+    MODEL = Emulator
+    SCHEMA = EmulatorSchema
+
+    def create_entries(self, n):
+        return _create_entries(n)
+
+
+class TestEmulatorAPI(_TestPrivateAPIBase):
+    ENDPOINT = '/api/emulators/'
+    MODEL = Emulator
+    SCHEMA = EmulatorSchema
+
+    def create_entries(self, n):
+        return _create_entries(n)
 
 
     def test_emu_license(self, client, _db):

@@ -1,6 +1,6 @@
 import os
 from flask import Flask, jsonify
-from .extensions import db, migrate
+from .extensions import db, migrate, login_manager
 from .api.models import *
 from .config import DevelopmentConfig
 
@@ -14,12 +14,10 @@ def create_app(config=DevelopmentConfig, init_db=True):
     except OSError:
         pass
     
+    login_manager.init_app(app)
     db.init_app(app)
     migrate.init_app(app, db)
 
-    # if init_db:
-    #     with app.app_context():
-    #         db.create_all()
 
     from .api import api_bp
     app.register_blueprint(api_bp)

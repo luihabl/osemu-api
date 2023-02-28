@@ -1,5 +1,7 @@
 import json
 from abc import ABC, abstractmethod
+from osemu.api.views.base_views import get_or_create_obj
+import pytest
 
 
 def post_dict(client, route, d):
@@ -49,7 +51,6 @@ def check_dict(old: dict, new: dict) -> bool:
 
 
 class _TestAPIBase(ABC):
-
     ENDPOINT = None
     MODEL = None
     SCHEMA = None
@@ -65,6 +66,48 @@ class _TestAPIBase(ABC):
         """        
         raise NotImplementedError 
 
+
+class _TestPublicAPIBase(_TestAPIBase):
+
+    def test_unauthorized(self, _db, client):
+        data = self.create_entries(1)
+
+        res = client.get(self.ENDPOINT)
+        assert res.status_code == 200
+        
+        res = post_dict(client, self.ENDPOINT, data)
+        assert res.status_code == 401
+
+        res = client.put(f'{self.ENDPOINT}{1}/', 
+                         data=json.dumps(data), 
+                         content_type='application/json')
+        assert res.status_code == 401
+
+        res = client.patch(f'{self.ENDPOINT}{1}/', 
+                        data=json.dumps(data), 
+                        content_type='application/json')
+        assert res.status_code == 401
+
+        res = client.delete(f'{self.ENDPOINT}{1}/')
+        assert res.status_code == 401
+
+
+    def test_get(self, client, _db):
+        data = self.create_entries(3)
+
+        objs = get_or_create_obj(self.SCHEMA, data)
+        _db.session.add_all(objs)
+        _db.session.commit()
+
+        res = client.get(self.ENDPOINT)
+        assert res.status_code == 200
+
+        res_data = json.loads(res.data)
+        assert check_dict(data, res_data)
+
+
+@pytest.mark.usefixtures('authenticated_user')
+class _TestPrivateAPIBase(_TestAPIBase):
 
     def test_post(self, _db, client):
 
@@ -102,20 +145,6 @@ class _TestAPIBase(ABC):
         res_data = json.loads(res.data)
 
         assert len(res_data) == 0
-
-
-    def test_get(self, client, _db):
-        data = self.create_entries(3)
-
-        res = post_dict(client, self.ENDPOINT, data)
-
-        assert res.status_code == 200
-
-        res = client.get(self.ENDPOINT)
-        res_data = json.loads(res.data)
-
-        assert check_dict(data, res_data)
-
 
     def test_patch(self, client, _db):
         data = self.create_entries(1)

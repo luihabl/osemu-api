@@ -1,9 +1,18 @@
-from ..extensions import db
+from osemu.extensions import db, login_manager
 from sqlalchemy.orm import validates
 from sqlalchemy.schema import CheckConstraint
 from sqlalchemy.dialects.postgresql import UUID
 import uuid
+from flask_login import UserMixin
+from datetime import datetime
 
+
+class User(UserMixin, db.Model):
+    id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    email = db.Column(db.String(255), nullable=False, unique=True)
+    password = db.Column(db.String(255), nullable=False)
+    created_on = db.Column(db.DateTime, nullable=True, default=datetime.utcnow)
+    is_admin = db.Column(db.Boolean, nullable=False, default=False)
 
 emu_console = db.Table('emu_console',
                        db.Column('emulator_id', db.UUID, db.ForeignKey('emulator.id')),

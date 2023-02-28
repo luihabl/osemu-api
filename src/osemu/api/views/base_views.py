@@ -7,7 +7,21 @@ from sqlalchemy.orm.attributes import InstrumentedAttribute
 from osemu.api.schema import *
 import sys
 
-from osemu.extensions import db
+from functools import wraps
+from flask_login import current_user
+from osemu.extensions import login_manager, db
+
+def method_login_required():
+    def _method_login_required(f):
+        @wraps(f)
+        def __method_login_required(*args, **kwargs):
+            token = None
+            if not current_user.is_authenticated:
+                return login_manager.unauthorized()
+            return f(*args, **kwargs)
+        return __method_login_required
+    return _method_login_required
+
 
 def _all_as_list(q):
     return [it for (it,) in q.all()]
@@ -189,12 +203,15 @@ class EntryAPI(BaseModelView):
 
         return "Entry updated successfuly"    
 
+    @method_login_required()
     def patch(self, id):
         return self._update(id)
 
+    @method_login_required()
     def put(self, id):
         return self._update(id)
 
+    @method_login_required()
     def delete(self, id):
         entry = db.get_or_404(self.Model, id, description='Entity id not found.')
         db.session.delete(entry)
@@ -226,6 +243,7 @@ class GroupAPI(BaseModelView):
             return self.Schema().dump(entries[0])
         return self.Schema(many=True).dump(entries) 
 
+    @method_login_required()
     def post(self):
         json_data = request.get_json()
         if not json_data:

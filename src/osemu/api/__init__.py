@@ -16,3 +16,6 @@ api_bp.register_blueprint(languages_bp)
 
 from osemu.api.views.licenses import licenses_bp
 api_bp.register_blueprint(licenses_bp)
+
+from osemu.api.views.auth import auth_bp
+api_bp.register_blueprint(auth_bp)

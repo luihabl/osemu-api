@@ -4,6 +4,7 @@ import subprocess
 import time
 import psycopg2
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
+from osemu.api.models import *
 
 @click.group
 def manage_cli():
@@ -68,7 +69,19 @@ def create_db():
 
 @manage_cli.command(context_settings={"ignore_unknown_options": True})
 def upgrade_db():
-    call_and_exit(['flask', 'db', 'upgrade'])
+
+    from osemu import create_app
+    from osemu.extensions import db
+    from flask_migrate import upgrade, migrate, stamp
+
+    app = create_app()
+    app.app_context().push()
+    db.create_all()
+
+    # migrate database to latest revision
+    stamp()
+    migrate()
+    upgrade()
 
 @manage_cli.command(context_settings={"ignore_unknown_options": True})
 def test():
