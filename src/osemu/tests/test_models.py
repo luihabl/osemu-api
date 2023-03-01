@@ -200,12 +200,12 @@ def test_emulator_language_create(_db, app):
     emu_entry = _db.session.query(models.Emulator).filter_by(name=emu.name).first()
     
     assert emu_entry.name == emu.name
-    assert emu_entry.languages[0].language.name == emu_lang.language.name
-    assert emu_entry.languages[0].amount == emu_lang.amount
+    assert emu_entry.language_amounts[0].language.name == emu_lang.language.name
+    assert emu_entry.language_amounts[0].amount == emu_lang.amount
 
     emu2 = models.Emulator(
         name='Emu 2',
-        languages=[
+        language_amounts=[
             models.EmulatorLanguage(
                 language=models.Language(name='Python'),
                 amount=0.8
@@ -219,14 +219,14 @@ def test_emulator_language_create(_db, app):
     emu2_entry = _db.session.query(models.Emulator).filter_by(name=emu2.name).first()
     
     assert emu2_entry.name == emu2.name
-    assert emu2_entry.languages[0].language.name == 'Python'
+    assert emu2_entry.language_amounts[0].language.name == 'Python'
 
     python_lang = _db.session.query(models.Language).filter_by(name='Python').first()
     cpp_lang = _db.session.query(models.Language).filter_by(name='C++').first()
 
     emu3 = models.Emulator(
         name='Emu 3',
-        languages=[
+        language_amounts=[
             models.EmulatorLanguage(
                 language=python_lang,
                 amount=0.2
@@ -244,13 +244,13 @@ def test_emulator_language_create(_db, app):
     emu3_entry = _db.session.query(models.Emulator).filter_by(name=emu3.name).first()
     
     assert emu3_entry.name == emu3.name
-    assert emu3_entry.languages[0].language.name == 'Python'
-    assert emu3_entry.languages[1].language.name == 'C++'
+    assert emu3_entry.language_amounts[0].language.name == 'Python'
+    assert emu3_entry.language_amounts[1].language.name == 'C++'
 
 def test_emu_lang_create_from_dict(_db, app):
     data = {
         'name': 'Emu 1',
-        'languages': [
+        'language_amounts': [
             {'language': {'name': 'Python'}, 'amount': 0.8},
             {'language': {'name': 'Go'}, 'amount': 0.2}
         ]
@@ -264,12 +264,12 @@ def test_emu_lang_create_from_dict(_db, app):
     db_obj = _db.session.query(models.Emulator).filter_by(name=data['name']).first()
     
     assert db_obj.name == data['name']
-    assert db_obj.languages[0].language.name == 'Python'
-    assert db_obj.languages[1].language.name == 'Go'
+    assert db_obj.language_amounts[0].language.name == 'Python'
+    assert db_obj.language_amounts[1].language.name == 'Go'
 
     data2 = {
         'name': 'Emu 2',
-        'languages': [
+        'language_amounts': [
             {'language': {'name': 'C++'}, 'amount': 0.1},
             {'language': {'name': 'Go'}, 'amount': 0.9}
         ]
@@ -283,8 +283,8 @@ def test_emu_lang_create_from_dict(_db, app):
     db_obj = _db.session.query(models.Emulator).filter_by(name=data2['name']).first()
     
     assert db_obj.name == data2['name']
-    assert db_obj.languages[0].language.name == 'C++'
-    assert db_obj.languages[1].language.name == 'Go'
+    assert db_obj.language_amounts[0].language.name == 'C++'
+    assert db_obj.language_amounts[1].language.name == 'Go'
 
     q = _db.session.query(models.Language).all()
     assert len(q) == 3
@@ -296,7 +296,7 @@ def test_emu_lang_create_from_dict(_db, app):
 def test_create_delete_emu_lang_nested(app, _db):
     data = {
         'name': 'Emu 1',
-        'languages': [
+        'language_amounts': [
             {'language': {'name': 'Python'}, 'amount': 0.8},
             {'language': {'name': 'Go'}, 'amount': 0.2}
         ]
@@ -310,8 +310,8 @@ def test_create_delete_emu_lang_nested(app, _db):
     db_obj = _db.session.query(models.Emulator).filter_by(name=data['name']).first()
     
     assert db_obj.name == data['name']
-    assert db_obj.languages[0].language.name == 'Python'
-    assert db_obj.languages[1].language.name == 'Go'
+    assert db_obj.language_amounts[0].language.name == 'Python'
+    assert db_obj.language_amounts[1].language.name == 'Go'
 
     obj = _db.session.query(models.Language).filter_by(name='Python').first()
     _db.session.delete(obj)
@@ -321,7 +321,7 @@ def test_create_delete_emu_lang_nested(app, _db):
     assert len(q) == 1
 
     db_obj = _db.session.query(models.Emulator).filter_by(name=data['name']).first()
-    assert len(db_obj.languages) == 1
+    assert len(db_obj.language_amounts) == 1
 
 
 @patch('osemu.extensions.db')

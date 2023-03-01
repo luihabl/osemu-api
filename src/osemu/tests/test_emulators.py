@@ -78,7 +78,7 @@ class TestEmulatorAPI(_TestPrivateAPIBase):
 
     def test_emu_programming_languages(self, client, _db):
         data = self.create_entries(1)
-        data['languages'] = [
+        data['language_amounts'] = [
             {'language': {'name': 'C++'}, 'amount': 0.2},
             {'language': {'name': 'Python'}, 'amount': 0.8}
         ]
@@ -92,7 +92,7 @@ class TestEmulatorAPI(_TestPrivateAPIBase):
 
 
         data2 = self.create_entries(3)[-1]
-        data2['languages'] = [
+        data2['language_amounts'] = [
             {'language': {'name': 'C++'}, 'amount': 0.2},
             {'language': {'name': 'Go'}, 'amount': 0.8}
         ]

@@ -14,6 +14,9 @@ class User(UserMixin, db.Model):
     created_on = db.Column(db.DateTime, nullable=True, default=datetime.utcnow)
     is_admin = db.Column(db.Boolean, nullable=False, default=False)
 
+    def __repr__(self):
+        return f'<User {self.email}>'
+
 emu_console = db.Table('emu_console',
                        db.Column('emulator_id', db.UUID, db.ForeignKey('emulator.id')),
                        db.Column('console_id', db.UUID, db.ForeignKey('console.id'))
@@ -25,11 +28,14 @@ class Company(db.Model):
     name = db.Column(db.String(255), nullable=False, unique=True)
     consoles = db.relationship('Console', back_populates='company')
 
+    def __repr__(self):
+        return f'<Company {self.name}>'
+
 
 class Console(db.Model):
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     name = db.Column(db.String(255), nullable=False, unique=True)
-    company_id = db.Column(db.UUID, db.ForeignKey('company.id'), nullable=False)
+    company_id = db.Column(db.UUID, db.ForeignKey('company.id'))
     company = db.relationship('Company', back_populates='consoles')
     release_date = db.Column(db.Date)
     end_date = db.Column(db.Date)
@@ -38,7 +44,7 @@ class Console(db.Model):
     image_url = db.Column(db.String(512))
 
     def __repr__(self) -> str:
-        return f'Console(id={self.id}, name={self.name})'
+        return f'<Console {self.name}>'
 
 
 class EmulatorLanguage(db.Model):
@@ -48,10 +54,13 @@ class EmulatorLanguage(db.Model):
     emulator_id = db.Column('emulator_id', db.UUID, db.ForeignKey('emulator.id'))
     language_id = db.Column('language_id', db.UUID, db.ForeignKey('language.id'))
 
-    emulator = db.relationship('Emulator', back_populates='languages')
+    emulator = db.relationship('Emulator', back_populates='language_amounts')
     language = db.relationship('Language', back_populates='emulators')
 
     amount = db.Column(db.Float, nullable=False)
+
+    def __repr__(self) -> str:
+        return f'<{self.emulator.name} {self.language.name} {self.amount}>'
 
 
 class Language(db.Model):
@@ -60,6 +69,8 @@ class Language(db.Model):
 
     emulators = db.relationship('EmulatorLanguage', cascade="all,delete", back_populates='language')
 
+    def __repr__(self) -> str:
+        return f'<Language {self.name}>'
 
 class License(db.Model):
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
@@ -67,6 +78,8 @@ class License(db.Model):
     url = db.Column(db.String(255))
     emulators = db.relationship('Emulator', back_populates='license')
 
+    def __repr__(self) -> str:
+        return f'<License {self.name}>'
 
 class Emulator(db.Model):
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
@@ -85,7 +98,7 @@ class Emulator(db.Model):
     latest_update = db.Column(db.DateTime)
     release_date = db.Column(db.Date)
 
-    languages = db.relationship('EmulatorLanguage', cascade="all,delete", back_populates='emulator')
+    language_amounts = db.relationship('EmulatorLanguage', cascade="all,delete", back_populates='emulator')
     
     def __repr__(self) -> str:
-        return f'Emulator(id={self.id}, name={self.name})'
+        return f'<Emulator {self.name}>'

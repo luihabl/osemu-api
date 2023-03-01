@@ -55,7 +55,7 @@ class EmulatorSchema(Schema):
     short_description = fields.String()
     latest_update = fields.DateTime()
     release_date = fields.Date()
-    languages = fields.Nested('EmulatorLanguageSchema', many=True)
+    language_amounts = fields.Nested('EmulatorLanguageSchema', many=True)
 
 class EmulatorLanguageSchema(Schema):
     model = models.EmulatorLanguage
