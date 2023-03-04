@@ -40,3 +40,9 @@ def authenticated_user(app):
         login_user(user=user)
         yield
         logout_user()
+
+@pytest.fixture(scope='function')
+def logout(app):
+    with app.test_request_context():
+        yield
+        logout_user()
