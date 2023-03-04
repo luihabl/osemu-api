@@ -30,6 +30,14 @@ def create_user(data):
 
 
 def check_and_register_user(data):
+    """Check if user exists and creates if not.
+
+    Args:
+        data (dict): dictionary with data, including email and password.
+
+    Raises:
+        ValueError: Raised if user already exists or if not possible to create.
+    """    
 
     parsed = UserSchema().load(data)
 
