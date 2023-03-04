@@ -93,5 +93,40 @@ def run():
     # Load env
     call_and_exit(['flask', 'run'])
 
+
+@manage_cli.command(context_settings={"ignore_unknown_options": True})
+@click.argument('email', type=click.STRING)
+def create_admin_user(email):
+
+    from osemu import create_app
+    from osemu.extensions import db
+    from flask_migrate import upgrade, migrate, stamp
+
+    app = create_app()
+    app.app_context().push()
+    db.create_all()
+
+    import getpass
+    password1 = getpass.getpass('Enter a password:')
+    password2 = getpass.getpass('Enter the same password:')
+
+    if password1 != password2:
+        print('Passwords do not coincide.')
+        exit(1)
+    
+    if password1 == '':
+        print('Password cannot be empty.')
+        exit(1)
+    
+    #crate user
+    from osemu.api.views.auth import check_and_register_user
+    from marshmallow import ValidationError
+ 
+    try:
+        check_and_register_user({'email': email, 'password': password1})    
+    except (ValidationError, ValueError) as err:
+        print(err)
+        exit(1)
+
 if __name__ == "__main__":
     manage_cli()
