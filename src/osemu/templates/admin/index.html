@@ -1,0 +1,38 @@
+{% extends 'admin/master.html' %}
+{% block body %}
+{{ super() }}
+<div class="row-fluid">
+
+    <div>
+        <h1>OSEmu API admin</h1>
+
+        {% if current_user.is_authenticated %}
+
+        <p class="lead">Welcome to the admin panel for the OSEmu API data.</p>
+
+        {% else %}
+
+        <p class="lead">This is the admin panel of the OSEmu API data, please login to use.</p>
+
+        <form method="POST" action="">
+            {{ form.hidden_tag() if form.hidden_tag }}
+            {% for f in form if f.type != 'CSRFTokenField' %}
+            <div class="form-group">
+            {{ f.label }}<br>
+            {{ f }}
+            
+            </div>
+            {% endfor %}
+            {% if form.errors %}
+            <div class="alert alert-danger" role="alert">
+                Incorrect credentials.
+            </div>
+            {% endif %}
+            <button class="btn btn-primary" type="submit">Submit</button>
+        </form>
+        {{ link | safe }}
+        {% endif %}
+    </div>
+
+</div>
+{% endblock body %}

@@ -19,7 +19,7 @@ class BaseConfig:
     TESTING = False
     SQLALCHEMY_DATABASE_URI = _get_db_uri()
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    
+    FLASK_ADMIN_SWATCH = 'sandstone'
 
 class DevelopmentConfig(BaseConfig):
     SECRET_KEY=os.environ.get('FLASK_DEV_SECRET_KEY')

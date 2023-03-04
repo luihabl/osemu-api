@@ -6,6 +6,8 @@ import uuid
 from flask_login import UserMixin
 from datetime import datetime
 
+def get_one(cls, **kwargs):
+    return db.session.query(cls).filter_by(**kwargs).one_or_none()
 
 class User(UserMixin, db.Model):
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)

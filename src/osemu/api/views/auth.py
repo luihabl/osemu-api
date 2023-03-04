@@ -29,6 +29,19 @@ def create_user(data):
         return False
 
 
+def check_and_register_user(data):
+
+    parsed = UserSchema().load(data)
+
+    q = db.session.query(User).filter_by(email=parsed['email'])
+    if q.count() > 0:
+       raise ValueError('Email in use.')
+    
+    res = create_user(parsed)
+    if not res:
+        raise ValueError('Not able to create user')
+
+
 @auth_bp.route('/signup', methods=['POST'])
 def signup():
 
@@ -36,23 +49,12 @@ def signup():
     data = request.get_json()
     if not data:
         return jsonify(message='No JSON provided.'), 400
-
+    
     try:
-        parsed = UserSchema().load(data)
-    except ValidationError as err:
-        return jsonify(message='Invalid JSON provided.'), 400
-
-
-    # check if user exists
-    q = db.session.query(User).filter_by(email=parsed['email'])
-    if q.count() > 0:
-        return jsonify(message='Email in use.'), 400
-
-    # crate user
-    if not create_user(parsed):
-        return jsonify(message='Unable to create user.'), 400
-
-    return jsonify(message='User created successfuly.'), 200
+        check_and_register_user(data)
+        return jsonify(message='User created successfuly.'), 200
+    except:
+        return jsonify(message='Invalid information provided.'), 400
 
 
 @auth_bp.route('/login', methods=['POST'])
