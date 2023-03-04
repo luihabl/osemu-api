@@ -43,6 +43,7 @@ def check_and_register_user(data):
 
 
 @auth_bp.route('/signup', methods=['POST'])
+@login_required
 def signup():
 
     # parse data
