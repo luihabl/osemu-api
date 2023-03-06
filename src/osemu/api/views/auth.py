@@ -53,6 +53,23 @@ def check_and_register_user(data):
 @auth_bp.route('/signup', methods=['POST'])
 @login_required
 def signup():
+    """Create a user.
+    ---
+    post:
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: True
+        content:
+            application/json:
+              schema: UserSchema
+      responses:
+        200:
+          description: User created succesfully.
+        400:
+          description: Invalid data provided. This means the user already exists or the data is not formatted correctly.
+      
+    """
 
     # parse data
     data = request.get_json()
@@ -68,6 +85,20 @@ def signup():
 
 @auth_bp.route('/login', methods=['POST'])
 def login():
+    """Login user.
+    ---
+    post:
+      requestBody:
+        required: True
+        content:
+            application/json:
+              schema: UserSchema
+      responses:
+        200:
+          description: Logged in succesfully.
+        400:
+          description: Invalid data provided. This means the user was not found or the data is not formatted correctly.
+    """
     # parse data
     data = request.get_json()
     if not data:
@@ -98,6 +129,18 @@ def login():
 @auth_bp.route('/logout', methods=['POST'])
 @login_required
 def logout():
+    """Logout current user.
+    ---
+    post:
+      security:
+        - cookieAuth: []
+      responses:
+        200:
+          description: Logged out.
+        401:
+          description: Not logged in for logout.
+    
+    """
     logout_user()
     return jsonify(message='Logged out successfuly.')
 

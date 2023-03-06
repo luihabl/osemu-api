@@ -26,3 +26,6 @@ spec.components.security_scheme("cookieAuth", api_key_scheme)
 def register_views_on_spec():
     from osemu.api.views import auth
     spec.path(view=auth.get_user)
+    spec.path(view=auth.signup)
+    spec.path(view=auth.login)
+    spec.path(view=auth.logout)
