@@ -56,6 +56,9 @@ def signup():
     """Create a user.
     ---
     post:
+      description: Create a user.
+      tags:
+        - auth
       security:
         - cookieAuth: []
       requestBody:
@@ -88,6 +91,9 @@ def login():
     """Login user.
     ---
     post:
+      description: Login a user.
+      tags:
+        - auth
       requestBody:
         required: True
         content:
@@ -132,6 +138,9 @@ def logout():
     """Logout current user.
     ---
     post:
+      description: Logout current user.
+      tags:
+        - auth
       security:
         - cookieAuth: []
       responses:
@@ -151,6 +160,9 @@ def get_user():
     """Get current user information.
     ---
     get:
+      description: Get current user information.
+      tags:
+        - auth
       security:
         - cookieAuth: []
       responses:
