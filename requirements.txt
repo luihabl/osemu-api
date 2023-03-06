@@ -8,3 +8,4 @@ flask-admin>=1.6.1,<1.7.0
 flask-login>=0.6.2,<0.7.0
 apispec>=6.1.0,<6.2.0
 apispec-webframeworks>=0.5.2,<0.6.0
+flask-swagger-ui>=4.11.1,<4.12.0

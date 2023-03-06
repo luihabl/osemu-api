@@ -20,5 +20,5 @@ api_bp.register_blueprint(licenses_bp)
 from osemu.api.views.auth import auth_bp
 api_bp.register_blueprint(auth_bp)
 
-from osemu.api.views.spec import spec_bp
-api_bp.register_blueprint(spec_bp)
+from osemu.api.views.docs import docs_bp
+api_bp.register_blueprint(docs_bp)

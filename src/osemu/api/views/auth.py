@@ -105,4 +105,18 @@ def logout():
 @auth_bp.route('/user', methods=['GET'])
 @login_required
 def get_user():
+    """Get current user information.
+    ---
+    get:
+      security:
+        - cookieAuth: []
+      responses:
+        200:
+          description: Get current user information.
+          content:
+            application/json:
+              schema: UserSchema
+        401:
+          description: Unauthorized to get user info.
+    """
     return jsonify(UserSchema().dump(current_user))

@@ -10,6 +10,7 @@ spec = APISpec(
     plugins=[FlaskPlugin(), MarshmallowPlugin()],
 )
 
+# Marshmallow schemas
 from osemu.api import schema
 spec.components.schema("Company", schema=schema.CompanySchema)
 spec.components.schema("Console", schema=schema.ConsoleSchema)
@@ -17,3 +18,11 @@ spec.components.schema("Languages", schema=schema.LanguageSchema)
 spec.components.schema("Emulator", schema=schema.EmulatorSchema)
 spec.components.schema("User", schema=schema.UserSchema)
 
+# Flask login authentication
+api_key_scheme = {"type": "apiKey", "in": "cookie", "name": "remember_token"}
+spec.components.security_scheme("cookieAuth", api_key_scheme)
+
+# API views
+def register_views_on_spec():
+    from osemu.api.views import auth
+    spec.path(view=auth.get_user)

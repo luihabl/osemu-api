@@ -27,5 +27,12 @@ def create_app(config=DevelopmentConfig, init_db=True):
     from .api import api_bp
     app.register_blueprint(api_bp)
 
+    from osemu.api.views.docs import swaggerui_bp
+    app.register_blueprint(swaggerui_bp)
+
+    from osemu.docs.specs import register_views_on_spec
+    with app.app_context():
+        register_views_on_spec()
+    
     return app
 
