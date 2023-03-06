@@ -5,11 +5,21 @@ from sqlalchemy import inspect
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.attributes import InstrumentedAttribute
 from osemu.api.schema import *
+from uuid import UUID
 import sys
 
 from functools import wraps
 from flask_login import current_user
 from osemu.extensions import login_manager, db
+
+
+def uuid_is_valid(uuid_to_test, version=4):
+    try:
+        uuid_obj = UUID(uuid_to_test, version=version)
+    except ValueError:
+        return False
+    return str(uuid_obj) == uuid_to_test
+
 
 def method_login_required():
     def _method_login_required(f):
@@ -182,7 +192,9 @@ class EntryAPI(BaseModelView):
 
     def _update(self, id):
 
-        entry = db.get_or_404(self.Model, id)
+        entry = db.session.get(self.Model, id)
+        if not entry:
+            return "Invalid data provided.", 400
 
         json_data = request.get_json()
         if not json_data:
@@ -198,24 +210,43 @@ class EntryAPI(BaseModelView):
 
         update_obj(self.Schema, entry, upd_data)
 
+        try:
+            db.session.commit()
+        except:
+            db.session.rollback()
+            return "Error on update.", 400
 
-        db.session.commit()
-
-        return "Entry updated successfuly"    
+        return "Entry updated successfuly" , 200   
 
     @method_login_required()
     def patch(self, id):
+
+        if not uuid_is_valid(id):
+            return "Invalid id provided.", 400
+        
         return self._update(id)
 
     @method_login_required()
     def put(self, id):
+
+        if not uuid_is_valid(id):
+            return "Invalid id provided.", 400
+        
         return self._update(id)
 
     @method_login_required()
     def delete(self, id):
+
+        if not uuid_is_valid(id):
+            return "Invalid id provided.", 400
+        
         entry = db.get_or_404(self.Model, id, description='Entity id not found.')
         db.session.delete(entry)
-        db.session.commit()
+        try:
+            db.session.commit()
+        except:
+            db.session.rollback()
+            return "Error on delete", 400
         return "Entry deleted successfuly"
 
 
