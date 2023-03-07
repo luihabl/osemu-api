@@ -3,9 +3,7 @@ from flask import Blueprint
 from osemu.api.models import Emulator
 from osemu.api.schema import EmulatorSchema
 
-from .base_views import EntryAPI, GroupAPI
+from osemu.api.views.util import register_views
 
 emulators_bp = Blueprint('emulators', __name__, url_prefix='/emulators')
-
-emulators_bp.add_url_rule('/', view_func=GroupAPI.as_view('console-group', Emulator, EmulatorSchema))
-emulators_bp.add_url_rule('/<id>/', view_func=EntryAPI.as_view('console-entry', Emulator, EmulatorSchema))
+emulator_group_view, emulator_entry_view = register_views(emulators_bp, EmulatorSchema, Emulator)

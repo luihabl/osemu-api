@@ -3,7 +3,6 @@ from flask.views import MethodView
 from marshmallow import ValidationError, fields, EXCLUDE
 from sqlalchemy import inspect
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm.attributes import InstrumentedAttribute
 from osemu.api.schema import *
 from uuid import UUID
 import sys
@@ -179,131 +178,149 @@ class BaseModelView(MethodView):
         self.Model = Model
         self.Schema = Schema
 
+def get_entry_api_cls():
+    """Returns the EntryAPI class. This is done to be able to change its docstring 
+    in different places without changing other class definitions.
 
-class EntryAPI(BaseModelView):
-    """
-    API for `/group/<id>/` endpoints
-    """
+    Returns:
+        EntryAPI: entry API class.
+    """    
+
+    class EntryAPI(BaseModelView):
+        """
+        API for `/group/<id>/` endpoints
+        """
+        
+        def get(self, id):
+            entry = db.get_or_404(self.Model, id)
+            return self.Schema().dump(entry)
+
+
+        def _update(self, id):
+
+            entry = db.session.get(self.Model, id)
+            if not entry:
+                return "Invalid data provided.", 400
+
+            json_data = request.get_json()
+            if not json_data:
+                return "No input data provided", 400  
+
+            partial = request.method == 'PATCH'
+            
+            try:
+                upd_data = self.Schema().load(json_data, partial=partial)
+            except ValidationError as err:
+                return err.messages, 400
+
+
+            update_obj(self.Schema, entry, upd_data)
+
+            try:
+                db.session.commit()
+            except:
+                db.session.rollback()
+                return "Error on update.", 400
+
+            return "Entry updated successfuly" , 200   
+
+        @method_login_required()
+        def patch(self, id):
+
+            if not uuid_is_valid(id):
+                return "Invalid id provided.", 400
+            
+            return self._update(id)
+
+        @method_login_required()
+        def put(self, id):
+
+            if not uuid_is_valid(id):
+                return "Invalid id provided.", 400
+            
+            return self._update(id)
+
+        @method_login_required()
+        def delete(self, id):
+
+            if not uuid_is_valid(id):
+                return "Invalid id provided.", 400
+            
+            entry = db.get_or_404(self.Model, id, description='Entity id not found.')
+            db.session.delete(entry)
+            try:
+                db.session.commit()
+            except:
+                db.session.rollback()
+                return "Error on delete", 400
+            return "Entry deleted successfuly"
     
-    def get(self, id):
-        entry = db.get_or_404(self.Model, id)
-        return self.Schema().dump(entry)
+    return EntryAPI
 
+def get_group_api_cls():
+    """Returns the GroupAPI class. This is done to be able to change its docstring 
+    in different places without changing other class definitions.
 
-    def _update(self, id):
-
-        entry = db.session.get(self.Model, id)
-        if not entry:
-            return "Invalid data provided.", 400
-
-        json_data = request.get_json()
-        if not json_data:
-            return "No input data provided", 400  
-
-        partial = request.method == 'PATCH'
+    Returns:
+        GroupAPI: group API class.
+    """    
         
-        try:
-            upd_data = self.Schema().load(json_data, partial=partial)
-        except ValidationError as err:
-            return err.messages, 400
+    class GroupAPI(BaseModelView):
+        """
+        API for `/group/` endpoints
+        """
 
+        def __init__(self, Model, Schema, **kwargs):
+            super().__init__(Model, Schema)
+            self.searchable_fields = []
+            for name, field in self.Schema().fields.items():
+                if not field.dump_only:
+                    self.searchable_fields.append(name)
 
-        update_obj(self.Schema, entry, upd_data)
+        def get(self):
+            data = request.values.to_dict()
 
-        try:
-            db.session.commit()
-        except:
-            db.session.rollback()
-            return "Error on update.", 400
+            entries = _filter_wild(self.Model, db.select(self.Model), 
+                                self.searchable_fields, data)
+            entries = _filter_exact(self.Model, entries, ['id'], data)
+            entries = _all_as_list(db.session.execute(entries))
 
-        return "Entry updated successfuly" , 200   
+            if len(entries) == 1:
+                return self.Schema().dump(entries[0])
+            return self.Schema(many=True).dump(entries) 
 
-    @method_login_required()
-    def patch(self, id):
+        @method_login_required()
+        def post(self):
+            json_data = request.get_json()
+            if not json_data:
+                return "No input data provided", 400  
 
-        if not uuid_is_valid(id):
-            return "Invalid id provided.", 400
+            try:
+                entry = get_or_create_obj(self.Schema, json_data)
+            except ValidationError as err:
+                return err.messages, 400
+
+            instances = {'existent':[], 'new': []}
+
+            if not isinstance(entry, list):
+                entry = [entry]
+    
+            for e in entry:
+                if inspect(e).persistent:
+                    instances['existent'].append(e)
+                else:
+                    instances['new'].append(e)
+
+            try:
+                db.session.add_all(instances['new'])
+                db.session.commit()
+            except IntegrityError as err:
+                db.session.rollback()
+                return f'{err.orig}', 400
+
+            instances['new'] = self.Schema(many=True).dump(instances['new'])
+            instances['existent'] = self.Schema(many=True).dump(instances['existent'])
+
+            return jsonify(instances)
         
-        return self._update(id)
-
-    @method_login_required()
-    def put(self, id):
-
-        if not uuid_is_valid(id):
-            return "Invalid id provided.", 400
-        
-        return self._update(id)
-
-    @method_login_required()
-    def delete(self, id):
-
-        if not uuid_is_valid(id):
-            return "Invalid id provided.", 400
-        
-        entry = db.get_or_404(self.Model, id, description='Entity id not found.')
-        db.session.delete(entry)
-        try:
-            db.session.commit()
-        except:
-            db.session.rollback()
-            return "Error on delete", 400
-        return "Entry deleted successfuly"
-
-
-class GroupAPI(BaseModelView):
-    """
-    API for `/group/` endpoints
-    """
-
-    def __init__(self, Model, Schema, **kwargs):
-        super().__init__(Model, Schema)
-        self.searchable_fields = []
-        for name, field in self.Schema().fields.items():
-            if not field.dump_only:
-                self.searchable_fields.append(name)
-
-    def get(self):
-        data = request.values.to_dict()
-
-        entries = _filter_wild(self.Model, db.select(self.Model), 
-                            self.searchable_fields, data)
-        entries = _filter_exact(self.Model, entries, ['id'], data)
-        entries = _all_as_list(db.session.execute(entries))
-
-        if len(entries) == 1:
-            return self.Schema().dump(entries[0])
-        return self.Schema(many=True).dump(entries) 
-
-    @method_login_required()
-    def post(self):
-        json_data = request.get_json()
-        if not json_data:
-            return "No input data provided", 400  
-
-        try:
-            entry = get_or_create_obj(self.Schema, json_data)
-        except ValidationError as err:
-            return err.messages, 400
-
-        instances = {'existent':[], 'new': []}
-
-        if not isinstance(entry, list):
-            entry = [entry]
- 
-        for e in entry:
-            if inspect(e).persistent:
-                instances['existent'].append(e)
-            else:
-                instances['new'].append(e)
-
-        try:
-            db.session.add_all(instances['new'])
-            db.session.commit()
-        except IntegrityError as err:
-            db.session.rollback()
-            return f'{err.orig}', 400
-
-        instances['new'] = self.Schema(many=True).dump(instances['new'])
-        instances['existent'] = self.Schema(many=True).dump(instances['existent'])
-
-        return jsonify(instances)
+    return GroupAPI
