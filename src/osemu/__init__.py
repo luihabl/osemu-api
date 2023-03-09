@@ -5,6 +5,7 @@ from .api.models import *
 from .config import DevelopmentConfig
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
+from flask_cors import CORS
 
 def create_app(config=DevelopmentConfig, init_db=True):
 
@@ -15,6 +16,8 @@ def create_app(config=DevelopmentConfig, init_db=True):
         os.makedirs(app.instance_path)
     except OSError:
         pass
+
+    CORS(app)
     
     login_manager.init_app(app)
     db.init_app(app)
