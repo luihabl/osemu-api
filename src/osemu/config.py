@@ -20,6 +20,7 @@ class BaseConfig:
     SQLALCHEMY_DATABASE_URI = _get_db_uri()
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     FLASK_ADMIN_SWATCH = 'sandstone'
+    CORS_HEADERS = 'Content-Type'
 
 class DevelopmentConfig(BaseConfig):
     SECRET_KEY=os.environ.get('FLASK_DEV_SECRET_KEY')
