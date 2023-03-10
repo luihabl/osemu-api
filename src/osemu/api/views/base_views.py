@@ -200,11 +200,11 @@ def get_entry_api_cls():
 
             entry = db.session.get(self.Model, id)
             if not entry:
-                return "Invalid data provided.", 400
+                return jsonify(message="Invalid data provided."), 400
 
             json_data = request.get_json()
             if not json_data:
-                return "No input data provided", 400  
+                return jsonify(message="No input data provided"), 400  
 
             partial = request.method == 'PATCH'
             
@@ -220,15 +220,15 @@ def get_entry_api_cls():
                 db.session.commit()
             except:
                 db.session.rollback()
-                return "Error on update.", 400
+                return jsonify(message="Error on update."), 400
 
-            return "Entry updated successfuly" , 200   
+            return jsonify(message="Entry updated successfuly") , 200   
 
         @method_login_required()
         def patch(self, id):
 
             if not uuid_is_valid(id):
-                return "Invalid id provided.", 400
+                return jsonify(message="Invalid id provided."), 400
             
             return self._update(id)
 
@@ -236,7 +236,7 @@ def get_entry_api_cls():
         def put(self, id):
 
             if not uuid_is_valid(id):
-                return "Invalid id provided.", 400
+                return jsonify(message="Invalid id provided."), 400
             
             return self._update(id)
 
@@ -244,7 +244,7 @@ def get_entry_api_cls():
         def delete(self, id):
 
             if not uuid_is_valid(id):
-                return "Invalid id provided.", 400
+                return jsonify(message="Invalid id provided."), 400
             
             entry = db.get_or_404(self.Model, id, description='Entity id not found.')
             db.session.delete(entry)
@@ -252,8 +252,8 @@ def get_entry_api_cls():
                 db.session.commit()
             except:
                 db.session.rollback()
-                return "Error on delete", 400
-            return "Entry deleted successfuly"
+                return jsonify(message="Error on delete"), 400
+            return jsonify(message="Entry deleted successfuly")
     
     return EntryAPI
 
@@ -316,7 +316,7 @@ def get_group_api_cls():
                 db.session.commit()
             except IntegrityError as err:
                 db.session.rollback()
-                return f'{err.orig}', 400
+                return jsonify(message=f'{err.orig}'), 400
 
             instances['new'] = self.Schema(many=True).dump(instances['new'])
             instances['existent'] = self.Schema(many=True).dump(instances['existent'])
