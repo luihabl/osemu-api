@@ -41,6 +41,7 @@ def register_views_on_spec():
     from osemu.api.views import consoles
     spec.path(view=consoles.console_entry_view)
     spec.path(view=consoles.console_group_view)
+    spec.path(view=consoles.emulators_for_console_view)
 
     # Company
     from osemu.api.views import companies
