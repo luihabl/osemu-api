@@ -12,7 +12,7 @@ EXPOSE 8000
 RUN python -m venv /py && \
     /py/bin/pip install --upgrade pip && \
     apk add --update --no-cache \
-        postgresql-dev gcc python3-dev musl-dev &&\
+        postgresql-dev libffi-dev gcc python3-dev musl-dev &&\
     apk add --update --no-cache --virtual .build-deps \
         build-base postgresql-dev musl-dev zlib zlib-dev linux-headers && \
     /py/bin/pip install -r /tmp/requirements.txt && \

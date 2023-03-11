@@ -95,6 +95,75 @@ def run():
 
 
 @manage_cli.command(context_settings={"ignore_unknown_options": True})
+def fetch_github_data():
+    
+    from osemu import create_app
+    from osemu.extensions import db
+    from osemu.api.views.base_views import get_or_create_obj
+    from osemu.api import schema
+    from github import Github
+    from datetime import datetime
+    
+    app = create_app()
+    app.app_context().push()
+    db.create_all()
+
+    token = os.environ.get('GITHUB_TOKEN', None)
+    if token:
+        gh = Github(os.getenv('GITHUB_TOKEN'))
+    else:
+        print('No APIToken available.')
+        exit(1)
+
+    emulators : list[Emulator] = db.session.query(Emulator).all()
+    for emu in emulators:
+        gh_url = emu.git_url
+        
+        if not gh_url or gh_url == '':
+            continue
+
+        print(f'Updating data of {emu.name} @ {gh_url}')
+        
+        id = '/'.join(gh_url.split('/')[-2:])
+        repo = gh.get_repo(id)
+
+        emu.gh_stars = repo.stargazers_count
+
+        latest_commit = repo.get_commits()[0]
+        emu.latest_update = datetime.strptime(latest_commit.last_modified, '%a, %d %b %Y %H:%M:%S %Z')
+
+        languages = []
+        langs = repo.get_languages()
+        for lang_name, lang_amount in langs.items():
+
+            lang_obj = db.session.query(Language).filter_by(name=lang_name).first()
+            if not lang_obj:
+                lang_obj = Language(name=lang_name)
+                emu_lang = EmulatorLanguage(language=lang_obj, emulator=emu, amount=lang_amount)
+            else:
+                emu_lang = db.session.query(EmulatorLanguage).filter_by(language=lang_obj, emulator=emu).first()
+                if not emu_lang:
+                    emu_lang = EmulatorLanguage(language=lang_obj, emulator=emu, amount=lang_amount)
+                else:
+                    emu_lang.amount = lang_amount
+
+            languages.append(emu_lang)
+
+        emu.language_amounts = languages
+
+
+        
+        # langs = repo.get_languages()
+        # for lang_name, lang_amount in langs.items():
+            
+    try:
+        db.session.commit()
+    except:
+        db.session.rollback()
+
+ 
+
+@manage_cli.command(context_settings={"ignore_unknown_options": True})
 @click.argument('email', type=click.STRING)
 def create_admin_user(email):
 
