@@ -11,12 +11,19 @@ spec = APISpec(
 )
 
 # Marshmallow schemas
+from apispec.exceptions import DuplicateComponentNameError
+def try_to_register(name, schema):
+    try:
+        spec.components.schema(name, schema=schema)
+    except DuplicateComponentNameError:
+        print(f'Not registering {name} (DuplicateComponentNameError)')
+
 from osemu.api import schema
-spec.components.schema("Languages", schema=schema.LanguageSchema)
-spec.components.schema("Company", schema=schema.CompanySchema)
-spec.components.schema("Console", schema=schema.ConsoleSchema)
-spec.components.schema("Emulator", schema=schema.EmulatorSchema)
-spec.components.schema("User", schema=schema.UserSchema)
+try_to_register("Languages", schema=schema.LanguageSchema)
+try_to_register("Company", schema=schema.CompanySchema)
+try_to_register("Console", schema=schema.ConsoleSchema)
+try_to_register("Emulator", schema=schema.EmulatorSchema)
+try_to_register("User", schema=schema.UserSchema)
 
 # Flask login authentication
 api_key_scheme = {"type": "apiKey", "in": "cookie", "name": "remember_token"}

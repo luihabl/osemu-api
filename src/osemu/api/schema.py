@@ -28,8 +28,6 @@ class ConsoleSchema(Schema):
     image_url = fields.String()
 
 class LanguageSchema(Schema):
-    class Meta:
-        exclude = ('emulators',)
 
     model = models.Language
     id = fields.UUID(dump_only=True)
@@ -56,11 +54,11 @@ class EmulatorSchema(Schema):
     short_description = fields.String()
     latest_update = fields.DateTime()
     release_date = fields.Date()
-    language_amounts = fields.Nested('EmulatorLanguageSchema', many=True)
+    language_amounts = fields.Nested('EmulatorLanguageSchema', exclude=('emulator',), many=True)
 
 class EmulatorLanguageSchema(Schema):
     model = models.EmulatorLanguage
     id = fields.UUID(dump_only=True)
     emulator = fields.Nested(EmulatorSchema, only=('id', 'name'), unknown=EXCLUDE)
-    language = fields.Nested(LanguageSchema, only=('id', 'name'),unknown=EXCLUDE)
+    language = fields.Nested(LanguageSchema, only=('id', 'name'), unknown=EXCLUDE)
     amount = fields.Float(required=True)
