@@ -86,8 +86,11 @@ class License(db.Model):
 class Emulator(db.Model):
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     name = db.Column(db.String(255), nullable=False, unique=True)  
+    
     git_url = db.Column(db.String(512))
     gh_stars = db.Column(db.Integer)
+    gh_forks = db.Column(db.Integer)
+
     website_url = db.Column(db.String(512))
     image_url = db.Column(db.String(512)) 
 

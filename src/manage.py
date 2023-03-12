@@ -128,9 +128,11 @@ def fetch_github_data():
         repo = gh.get_repo(id)
 
         emu.gh_stars = repo.stargazers_count
+        emu.gh_forks = repo.forks_count
 
         latest_commit = repo.get_commits()[0]
         emu.latest_update = datetime.strptime(latest_commit.last_modified, '%a, %d %b %Y %H:%M:%S %Z')
+        emu.release_date = repo.created_at
 
         languages = []
         langs = repo.get_languages()
@@ -151,11 +153,39 @@ def fetch_github_data():
 
         emu.language_amounts = languages
 
-
+        license = None
+        try:
+            license = repo.get_license()
+        except:
+            print(f'No license found for {emu.name}')
+            emu.license = None
         
-        # langs = repo.get_languages()
-        # for lang_name, lang_amount in langs.items():
+        if license:
+            name = license.license.name
+
+            try:
+                url = license.license.html_url
+            except:
+                url = ''
+
+            if name == 'Other':
+                name = f'{emu.name} License'
+                url = license.html_url
+
+            lic_obj = db.session.query(License).filter_by(name=name).first()
+
+            if not lic_obj:
+                lic_obj = License(name=name, url=url)
             
+            lic_obj.url = url
+            
+            emu.license = lic_obj
+
+        emu.short_description = repo.description
+
+        if repo.homepage:
+            emu.website_url = repo.homepage
+
     try:
         db.session.commit()
     except:

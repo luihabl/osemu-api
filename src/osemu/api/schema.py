@@ -48,6 +48,7 @@ class EmulatorSchema(Schema):
     name = fields.String(required=True, validate=must_not_be_blank)
     git_url = fields.String()
     gh_stars = fields.Integer()
+    gh_forks = fields.Integer()
     website_url = fields.String()
     image_url = fields.String()
     consoles = fields.Nested(ConsoleSchema, many=True, unknown=EXCLUDE)
