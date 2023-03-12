@@ -32,7 +32,7 @@ class LanguageSchema(Schema):
     model = models.Language
     id = fields.UUID(dump_only=True)
     name = fields.String(required=True, validate=must_not_be_blank)
-    emulators = fields.Nested('EmulatorLanguageSchema', exclude=('language',), many=True, unknown=EXCLUDE)
+    emulators = fields.Nested('EmulatorsForLanguageSchema', many=True, unknown=EXCLUDE)
 
 class LicenseSchema(Schema):
     model = models.License
@@ -40,6 +40,11 @@ class LicenseSchema(Schema):
     name = fields.String(required=True, validate=must_not_be_blank)
     url = fields.String()
 
+class EmulatorNameSchema(Schema):
+    model = models.Emulator
+    id = fields.UUID(dump_only=True)
+    name = fields.String(required=True, validate=must_not_be_blank)
+    
 class EmulatorSchema(Schema):
     model = models.Emulator
     id = fields.UUID(dump_only=True)
@@ -54,11 +59,15 @@ class EmulatorSchema(Schema):
     short_description = fields.String()
     latest_update = fields.DateTime()
     release_date = fields.Date()
-    language_amounts = fields.Nested('EmulatorLanguageSchema', exclude=('emulator',), many=True)
+    language_amounts = fields.Nested('LanguagesForEmulatorSchema', many=True)
 
-class EmulatorLanguageSchema(Schema):
+class LanguagesForEmulatorSchema(Schema):
     model = models.EmulatorLanguage
     id = fields.UUID(dump_only=True)
-    emulator = fields.Nested(EmulatorSchema, only=('id', 'name'), unknown=EXCLUDE)
     language = fields.Nested(LanguageSchema, only=('id', 'name'), unknown=EXCLUDE)
     amount = fields.Float(required=True)
+
+class EmulatorsForLanguageSchema(Schema):
+    model = models.EmulatorLanguage
+    id = fields.UUID(dump_only=True)
+    emulator = fields.Nested(EmulatorNameSchema, only=('id', 'name'), unknown=EXCLUDE)
