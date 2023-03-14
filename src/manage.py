@@ -251,13 +251,11 @@ def create_default_admin_user():
 
     if email is None or password is None:
         print('No admin info provided.')
-        exit(1)
-
+        
     try:
         check_and_register_user({'email': email, 'password': password})    
     except (ValidationError, ValueError) as err:
         print(err)
-        exit(1)
 
 
 
