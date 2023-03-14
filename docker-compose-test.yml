@@ -22,6 +22,8 @@ services:
       - POSTGRES_HOST=db_test
       - POSTGRES_PORT=5433
       - USING_TEST_DB=
+      - ADMIN_USER_EMAIL=admin@example.com
+      - ADMIN_USER_PASSWORD=123123
     command: sh -c "python manage.py wait-for-db && 
                     python manage.py create-db &&
                     python manage.py upgrade-db &&

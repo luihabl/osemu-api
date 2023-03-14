@@ -22,9 +22,12 @@ services:
       - POSTGRES_HOST=db
       - POSTGRES_PORT=5432
       - GITHUB_TOKEN=${GITHUB_TOKEN}
+      - ADMIN_USER_EMAIL=admin@example.com
+      - ADMIN_USER_PASSWORD=123123
     command: sh -c "python manage.py wait-for-db && 
                     python manage.py create-db &&
                     python manage.py upgrade-db &&
+                    python manage.py create-default-admin-user &&
                     python manage.py run"
     stop_signal: SIGINT
     depends_on:

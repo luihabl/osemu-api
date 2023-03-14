@@ -232,5 +232,34 @@ def create_admin_user(email):
         print(err)
         exit(1)
 
+
+@manage_cli.command(context_settings={"ignore_unknown_options": True})
+def create_default_admin_user():
+    from osemu import create_app
+    from osemu.extensions import db
+
+    app = create_app()
+    app.app_context().push()
+    db.create_all()
+
+    #crate user
+    from osemu.api.views.auth import check_and_register_user
+    from marshmallow import ValidationError
+
+    email = os.environ.get('ADMIN_USER_EMAIL', None)
+    password = os.environ.get('ADMIN_USER_PASSWORD', None)
+
+    if email is None or password is None:
+        print('No admin info provided.')
+        exit(1)
+
+    try:
+        check_and_register_user({'email': email, 'password': password})    
+    except (ValidationError, ValueError) as err:
+        print(err)
+        exit(1)
+
+
+
 if __name__ == "__main__":
     manage_cli()
