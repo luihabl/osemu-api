@@ -2,12 +2,12 @@ import os
 from flask import Flask, jsonify
 from .extensions import db, migrate, login_manager, admin
 from .api.models import *
-from .config import DevelopmentConfig
+from .config import Config
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
 from flask_cors import CORS
 
-def create_app(config=DevelopmentConfig, init_db=True):
+def create_app(config=Config, init_db=True):
 
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_object(config)

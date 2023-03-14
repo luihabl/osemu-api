@@ -22,9 +22,8 @@ class BaseConfig:
     FLASK_ADMIN_SWATCH = 'sandstone'
     CORS_HEADERS = 'Content-Type'
 
-class DevelopmentConfig(BaseConfig):
-    SECRET_KEY=os.environ.get('FLASK_DEV_SECRET_KEY')
+class Config(BaseConfig):
+    SECRET_KEY=os.environ.get('FLASK_SECRET_KEY')
 
-
-class TestingConfig(DevelopmentConfig):
+class TestingConfig(Config):
     TESTING = True
