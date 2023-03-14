@@ -120,9 +120,14 @@ def fetch_github_data():
         gh_url = emu.git_url
         
         if not gh_url or gh_url == '':
+            print(f'No git url defined.')
             continue
 
         print(f'Updating data of {emu.name} @ {gh_url}')
+
+        if gh_url.endswith('/'):
+            gh_url = gh_url.rstrip('/')
+            emu.git_url = gh_url
         
         id = '/'.join(gh_url.split('/')[-2:])
         repo = gh.get_repo(id)
