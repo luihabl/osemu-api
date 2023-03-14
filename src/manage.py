@@ -48,10 +48,10 @@ def wait_for_db():
         total += 1
         if total > 10:
             print('Giving up.')
-            return 1
+            exit(1)
 
     print('Database available!')
-    return 0
+    exit(0)
 
 @manage_cli.command(context_settings={"ignore_unknown_options": True})
 def create_db():
