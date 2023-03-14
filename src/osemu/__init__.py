@@ -11,6 +11,7 @@ def create_app(config=Config, init_db=True):
 
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_object(config)
+    app.url_map.strict_slashes = False
 
     try:
         os.makedirs(app.instance_path)
