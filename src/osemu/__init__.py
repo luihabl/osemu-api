@@ -1,11 +1,12 @@
 import os
 from flask import Flask, jsonify
-from .extensions import db, migrate, login_manager, admin
+from .extensions import db, migrate, login_manager, admin, scheduler
 from .api.models import *
 from .config import Config
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
 from flask_cors import CORS
+from .scheduled.jobs import *
 
 def create_app(config=Config, init_db=True):
 
@@ -24,6 +25,7 @@ def create_app(config=Config, init_db=True):
     db.init_app(app)
     migrate.init_app(app, db)
     admin.init_app(app)
+    scheduler.init_app(app)
 
     from osemu.admin.views import register_admin_views
     register_admin_views()
@@ -37,6 +39,14 @@ def create_app(config=Config, init_db=True):
     from osemu.docs.specs import register_views_on_spec
     with app.app_context():
         register_views_on_spec()
+    
+    if app.config.get('START_SCHEDULED_JOBS'):
+        
+        if scheduler.running:
+            return
+        
+        print('Starting jobs')
+        scheduler.start()
     
     return app
 

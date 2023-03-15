@@ -5,6 +5,7 @@ import time
 import psycopg2
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 from osemu.api.models import *
+from osemu.config import ConfigNoScheduledJobs
 
 @click.group
 def manage_cli():
@@ -74,7 +75,7 @@ def upgrade_db():
     from osemu.extensions import db
     from flask_migrate import upgrade, migrate, stamp
 
-    app = create_app()
+    app = create_app(ConfigNoScheduledJobs)
     app.app_context().push()
     db.create_all()
 
@@ -104,7 +105,7 @@ def fetch_github_data():
     from github import Github
     from datetime import datetime
     
-    app = create_app()
+    app = create_app(ConfigNoScheduledJobs)
     app.app_context().push()
     db.create_all()
 
@@ -206,7 +207,7 @@ def create_admin_user(email):
     from osemu.extensions import db
     from flask_migrate import upgrade, migrate, stamp
 
-    app = create_app()
+    app = create_app(ConfigNoScheduledJobs)
     app.app_context().push()
     db.create_all()
 
@@ -238,7 +239,7 @@ def create_default_admin_user():
     from osemu import create_app
     from osemu.extensions import db
 
-    app = create_app()
+    app = create_app(ConfigNoScheduledJobs)
     app.app_context().push()
     db.create_all()
 

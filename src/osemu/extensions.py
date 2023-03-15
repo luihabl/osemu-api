@@ -15,3 +15,7 @@ migrate = Migrate()
 from flask_admin import Admin
 from osemu.admin.index import LoginAdminIndexView
 admin = Admin(name='OSEmu', template_mode='bootstrap4', index_view=LoginAdminIndexView(), base_template='admin_master.html')
+
+# Flask-APScheduler
+from flask_apscheduler import APScheduler
+scheduler = APScheduler()

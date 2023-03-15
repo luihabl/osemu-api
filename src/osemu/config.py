@@ -21,9 +21,13 @@ class BaseConfig:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     FLASK_ADMIN_SWATCH = 'sandstone'
     CORS_HEADERS = 'Content-Type'
+    START_SCHEDULED_JOBS=True
 
 class Config(BaseConfig):
     SECRET_KEY=os.environ.get('FLASK_SECRET_KEY')
 
-class TestingConfig(Config):
+class ConfigNoScheduledJobs(Config):
+    START_SCHEDULED_JOBS=False
+
+class TestingConfig(ConfigNoScheduledJobs):
     TESTING = True
