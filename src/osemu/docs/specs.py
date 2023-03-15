@@ -8,6 +8,7 @@ spec = APISpec(
     version="1.0.0",
     openapi_version="3.0.2",
     plugins=[FlaskPlugin(), MarshmallowPlugin()],
+    info=dict(description="GitHub project repository: [https://github.com/luihabl/osemu-api](https://github.com/luihabl/osemu-api)"),
 )
 
 # Marshmallow schemas
