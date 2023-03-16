@@ -112,8 +112,9 @@ def fetch_gh_data():
         try:
             fetch_github_data()
             print('Data fetching finished.')
-        except:
-            print('Failed to fetch Github data')
+        except Exception as e:
+            print('Failed to fetch Github data:')
+            print(e)
 
         
     
