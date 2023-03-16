@@ -1,8 +1,9 @@
 from osemu.extensions import scheduler
 from osemu.api import models
+import time
 
 def fetch_github_data():
-    
+
     from osemu.extensions import db
     from osemu.api.views.base_views import get_or_create_obj
     from osemu.api import schema
@@ -102,19 +103,37 @@ def fetch_github_data():
         print('Failed to save data')
 
  
-@scheduler.task('interval', id='fetch_gh_data_1', hours=12, misfire_grace_time=900)
+@scheduler.task('interval', id='fetch_gh_data_1', days=1, misfire_grace_time=900)
 def fetch_gh_data():
 
     print('Fetching Github data')
 
     with scheduler.app.app_context():
-    
-        try:
-            fetch_github_data()
-            print('Data fetching finished.')
-        except Exception as e:
-            print('Failed to fetch Github data:')
-            print(e)
+
+        tries = 5
+        succesful = False
+
+        while tries > 0 and not succesful:
+            try:
+                fetch_github_data()
+                print('Data fetching finished.')
+                succesful = True
+            
+            except Exception as e:
+                print('Failed to fetch Github data:')
+                print(e)
+                
+                tries -= 1
+                if tries > 0:
+                    print(f'Trying again...')
+                    secs = 5
+                    while secs > 0:
+                        print(f'in {secs}s')
+                        time.sleep(1)
+                        secs -= 1
+                else:
+                    print('Giving up.')
+            
 
         
     
