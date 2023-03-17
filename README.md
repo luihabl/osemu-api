@@ -27,6 +27,8 @@ The API uses session cookies for authentication with [Flask-Login](https://githu
 
 User creation can only be done by authenticated users sending a POST request to `/auth/user`. Therefore, you need to create an initial admin user, which can be done with the manage command `python manage.py create-admin-user <example@example.com>`. However, every time you run the app it will run the command `create-default-admin-user`, which will create a user with the credentials given in the environment variables `ADMIN_USER_EMAIL` and `ADMIN_USER_PASSWORD`. So you can use these credentials to login initially. 
 
+The project uses [APScheduler](https://github.com/agronholm/apscheduler) for scheduling a task for updating the emulator entries on a daily basis using the GitHub REST API. 
+
 
 ## Development
 
