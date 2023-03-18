@@ -336,7 +336,7 @@ def get_group_api_cls():
                 db.session.commit()
             except IntegrityError as err:
                 db.session.rollback()
-                return jsonify(message=f'{err.orig}'), 500
+                return jsonify(message=f'{err.orig}'), 400
 
             instances['new'] = self.Schema(many=True).dump(instances['new'])
             instances['existent'] = self.Schema(many=True).dump(instances['existent'])
