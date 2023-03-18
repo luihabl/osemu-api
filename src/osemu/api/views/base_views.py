@@ -192,13 +192,22 @@ def get_entry_api_cls():
         """
         
         def get(self, id):
-            entry = db.get_or_404(self.Model, id)
-            return self.Schema().dump(entry)
 
-
+            try:
+                entry = db.session.get(self.Model, id)
+                if not entry:
+                    return jsonify(message="Entry not found.")
+                return self.Schema().dump(entry)
+            except:
+                return jsonify(message="Impossible to fetch data, possibly a database server fault. Try again later."), 500
+            
         def _update(self, id):
-
-            entry = db.session.get(self.Model, id)
+            
+            try:
+                entry = db.session.get(self.Model, id)
+            except:
+                return jsonify(message="Impossible to fetch data, possibly a database server fault. Try again later."), 500
+            
             if not entry:
                 return jsonify(message="Invalid data provided."), 400
 
@@ -211,8 +220,7 @@ def get_entry_api_cls():
             try:
                 upd_data = self.Schema().load(json_data, partial=partial)
             except ValidationError as err:
-                return err.messages, 400
-
+                return jsonify(message=f'Invalid input data provided [{err.messages}]'), 400
 
             update_obj(self.Schema, entry, upd_data)
 
@@ -246,7 +254,14 @@ def get_entry_api_cls():
             if not uuid_is_valid(id):
                 return jsonify(message="Invalid id provided."), 400
             
-            entry = db.get_or_404(self.Model, id, description='Entity id not found.')
+            try:
+                entry = db.session.get(self.Model, id)
+            except:
+                return jsonify(message="Impossible to fetch data, possibly a database server fault. Try again later."), 500
+            
+            if not entry:
+                return jsonify(message='Entry not found.')
+
             db.session.delete(entry)
             try:
                 db.session.commit()
@@ -280,10 +295,13 @@ def get_group_api_cls():
         def get(self):
             data = request.values.to_dict()
 
-            entries = _filter_wild(self.Model, db.select(self.Model), 
-                                self.searchable_fields, data)
-            entries = _filter_exact(self.Model, entries, ['id'], data)
-            entries = _all_as_list(db.session.execute(entries))
+            try:
+                entries = _filter_wild(self.Model, db.select(self.Model), 
+                                    self.searchable_fields, data)
+                entries = _filter_exact(self.Model, entries, ['id'], data)
+                entries = _all_as_list(db.session.execute(entries))
+            except:
+                return jsonify(message='Error when fetching data, possibly a database server fault. Try again later.'), 500
 
             if len(entries) == 1:
                 return self.Schema().dump(entries[0])
@@ -293,12 +311,14 @@ def get_group_api_cls():
         def post(self):
             json_data = request.get_json()
             if not json_data:
-                return "No input data provided", 400  
+                return jsonify(message="No input data provided."), 400  
 
             try:
                 entry = get_or_create_obj(self.Schema, json_data)
             except ValidationError as err:
-                return err.messages, 400
+                return jsonify(message=f'Invalid input data provided [{err.messages}]'), 400
+            except:
+                return jsonify(message='Error when creating data, possibly a database server fault. Try again later.'), 500
 
             instances = {'existent':[], 'new': []}
 
@@ -316,7 +336,7 @@ def get_group_api_cls():
                 db.session.commit()
             except IntegrityError as err:
                 db.session.rollback()
-                return jsonify(message=f'{err.orig}'), 400
+                return jsonify(message=f'{err.orig}'), 500
 
             instances['new'] = self.Schema(many=True).dump(instances['new'])
             instances['existent'] = self.Schema(many=True).dump(instances['existent'])

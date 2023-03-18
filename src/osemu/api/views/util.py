@@ -19,6 +19,11 @@ default_group_docstr = {
                 schema:
                   type: array
                   items: $schema
+          500:
+            description: Server fault, try again later.
+            content:
+              application/json:
+                schema: ErrorResponse
         """,
 
     'post': """Post `$name` object.
@@ -55,8 +60,19 @@ default_group_docstr = {
                       description: Objects that already existed.
           400:
             description: Invalid information provided.
+            content:
+              application/json:
+                schema: ErrorResponse
           401:
             description: Not logged in.
+            content:
+              application/json:
+                schema: ErrorResponse
+          500:
+            description: Server error.
+            content:
+              application/json:
+                schema: ErrorResponse
         """
 }
 
@@ -80,6 +96,14 @@ default_entry_docstr = {
             schema: $schema
       404:
         description: Item not found.
+        content:
+          application/json:
+            schema: ErrorResponse
+      500:
+        description: Server error, try again later.
+        content:
+          application/json:
+            schema: ErrorResponse
     """,
     
     'patch': """Patch `$name` by ID
@@ -108,6 +132,13 @@ default_entry_docstr = {
             schema: $schema
       404:
         description: Item not found.
+      400:
+        description: Required information was not provided.
+      500:
+        description: Server error, try again later.
+        content:
+          application/json:
+            schema: ErrorResponse
     """,
 
     'put': """Put `$name` by ID
@@ -136,6 +167,13 @@ default_entry_docstr = {
             schema: $schema
       404:
         description: Item not found.
+      400:
+        description: Required information was not provided.
+      500:
+        description: Server error, try again later.
+        content:
+          application/json:
+            schema: ErrorResponse
     """,
 
     'delete': """Put `$name` by ID
@@ -156,6 +194,13 @@ default_entry_docstr = {
         description: Item deleted succesfully.
       404:
         description: Item not found.
+      400:
+        description: Required information was not provided.
+      500:
+        description: Server error, try again later.
+        content:
+          application/json:
+            schema: ErrorResponse
     """
 }
 

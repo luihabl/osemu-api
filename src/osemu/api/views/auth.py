@@ -16,6 +16,10 @@ auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
 def load_user(id):
     return db.session.get(User, id)
 
+@login_manager.unauthorized_handler
+def unauthorized():
+    return jsonify(message="Unauthorized: this action requires a logged in user."), 401
+
 def create_user(data):
     try:
         db.session.add(User(

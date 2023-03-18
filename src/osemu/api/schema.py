@@ -72,3 +72,6 @@ class EmulatorsForLanguageSchema(Schema):
     id = fields.UUID(dump_only=True)
     emulator = fields.Nested(EmulatorNameSchema, only=('id', 'name'), unknown=EXCLUDE)
     amount = fields.Float(required=True)
+
+class ErrorResponse(Schema):
+    message = fields.String(required=True)
